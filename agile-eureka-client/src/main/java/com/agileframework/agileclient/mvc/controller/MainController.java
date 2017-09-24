@@ -3,7 +3,7 @@ package com.agileframework.agileclient.mvc.controller;
 import com.agileframework.agileclient.common.base.Head;
 import com.agileframework.agileclient.common.base.RETURN;
 import com.agileframework.agileclient.common.base.Constant;
-import com.agileframework.agileclient.common.exception.NoSuchServiceException;
+import com.agileframework.agileclient.common.exception.NoSuchRequestServiceException;
 import com.agileframework.agileclient.common.server.ServiceInterface;
 import com.agileframework.agileclient.common.util.FactoryUtil;
 import com.agileframework.agileclient.common.util.ServletUtil;
@@ -71,7 +71,7 @@ public class MainController {
             @PathVariable String method,
             @RequestParam(value = "forward", required = false) String forward,
             @RequestParam(value = "file-path", required = false) String filePath
-    ) throws NoSuchServiceException,IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    ) throws Throwable {
         //初始化参数
         ModelAndView modelAndView = new ModelAndView();//响应视图对象
         service =  StringUtil.toLowerName(service);//设置服务名
@@ -128,12 +128,12 @@ public class MainController {
      * 根据服务名在Spring上下文中获取服务bean
      * @param serviceName   服务名
      */
-    private void initService(String serviceName)throws NoSuchServiceException {
+    private void initService(String serviceName)throws NoSuchRequestServiceException {
         try {
             Object service = FactoryUtil.getBean(serviceName);
             this.setService((ServiceInterface) service);
         }catch (Exception e){
-            throw new NoSuchServiceException();
+            throw new NoSuchRequestServiceException("[服务类:" + serviceName + "]于系统中不存在！");
         }
     }
 
@@ -143,8 +143,6 @@ public class MainController {
      */
     private void handleRequestUrl(HttpServletRequest request) {
         HashMap<String, Object> inParam = new HashMap<>();
-        inParam.put(Constant.ResponseAbout.IP, ServletUtil.getCustomerIPAddr(request));
-        inParam.put(Constant.ResponseAbout.URL, request.getRequestURL());
 
         //---------------------------------请求参数解析------------------------------------
         String queryString = request.getQueryString();

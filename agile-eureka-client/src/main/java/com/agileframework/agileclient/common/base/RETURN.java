@@ -4,10 +4,10 @@ package com.agileframework.agileclient.common.base;
  * Created by 佟盟 on 2017/1/9
  */
 public final class RETURN {
-    //默认响应状态码
+    //响应状态码
     private String code;
 
-    //默认响应信息
+    //响应信息
     private String msg;
 
     //请求类响应状态
@@ -47,6 +47,7 @@ public final class RETURN {
     public final static RETURN NUSUCH_BEAN_EXPRESSION = new RETURN("200016","找不到指定实体！");
     public final static RETURN MAX_UPLOAD_SIZE_EXPRESSION = new RETURN("200017","上传文件大小超出最大值！");
     public final static RETURN FILE_NOT_FOUND_EXPRESSION = new RETURN("200018","系统找不到指定路径！");
+    public final static RETURN NO_SUCH_METHPD_EXPRESSION = new RETURN("200019","调用方法不存在！");
     //业务逻辑响应状态
     public final static RETURN PARAMETER_ERROR = new RETURN("300000","请求参数中，未包含可用参数！");
 

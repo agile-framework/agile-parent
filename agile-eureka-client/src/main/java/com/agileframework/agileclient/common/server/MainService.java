@@ -1,30 +1,23 @@
 package com.agileframework.agileclient.common.server;
 
-import com.agileframework.agileclient.common.configure.ExceptionHandler;
+import com.agileframework.agileclient.common.exception.ExceptionHandler;
 import com.agileframework.agileclient.common.base.RETURN;
-import com.agileframework.agileclient.common.util.ObjectUtil;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.data.domain.PageRequest;
+import com.agileframework.agileclient.common.exception.NoSuchRequestMethodException;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 /**
  * Created by 佟盟 on 2017/1/9
  */
 public class MainService extends ExceptionHandler implements ServiceInterface {
+
     //日志工具
-    private ThreadLocal<Logger> logger = new ThreadLocal<Logger>(){
-        @Override
-        protected Logger initialValue() {
-            return LogManager.getLogger(this.getClass());
-        }
-    };
+    private ThreadLocal<org.slf4j.Logger> logger = new ThreadLocal<>();
 
     //输入
     private ThreadLocal<HashMap<String, Object>> inParam = new ThreadLocal<>();
@@ -38,15 +31,21 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * @param object 服务子类对象，为解决Hystrix组件无法识别服务子类问题（识别成了父类）
      * @return 返回执行结果
      */
-    public RETURN executeMethod(String methodName,Object object) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        return this.execute(this.getClass().getDeclaredMethod(methodName),object);
-    }
-
     @Transactional
-    protected RETURN execute(Method method,Object object) throws IllegalAccessException,IllegalArgumentException,InvocationTargetException,SecurityException{
-        //取消安全检测，提高性能
-        method.setAccessible(true);
-        return (RETURN) method.invoke(object);
+    public RETURN executeMethod(String methodName,Object object) throws Throwable {
+        //初始化日志控件
+        setLogger(LoggerFactory.getLogger(this.getClass()));
+
+        try {
+            Method method = this.getClass().getDeclaredMethod(methodName);
+            //取消安全检测，提高性能
+            method.setAccessible(true);
+            return (RETURN) method.invoke(object);
+        }catch (NoSuchMethodException e){
+            throw new NoSuchRequestMethodException("[方法:" + methodName + "]于[服务类:" + this.getClass().getName() + "]中不存在！");
+        }catch (InvocationTargetException e){
+            throw e.getTargetException();
+        }
     }
 
     /**
@@ -193,7 +192,7 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * 服务中调用该方法获取入参集合
      * @return 入参集合
      */
-    protected HashMap<String, Object> getInParam() {
+    public HashMap<String, Object> getInParam() {
         return inParam.get();
     }
 
@@ -217,8 +216,15 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
     /**
      * 日志工具
      */
-    public void getLogger(){
-        this.logger.get();
+    public void setLogger(org.slf4j.Logger logger){
+        this.logger.set(logger);
+    }
+
+    /**
+     * 日志工具
+     */
+    public org.slf4j.Logger getLogger(){
+        return this.logger.get();
     }
 
 }

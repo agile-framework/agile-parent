@@ -20,16 +20,8 @@ public class Head implements Serializable {
     public Head(RETURN returnState, HttpServletRequest request) {
         this.ip = ServletUtil.getCustomerIPAddr(request);
         this.url = request.getScheme() + "://" + ServletUtil.localhostFormat(request.getLocalAddr())+ ":" + request.getLocalPort() + request.getRequestURI();
-        code = "";
         this.code = returnState.getCode();
         this.msg = returnState.getMsg();
-
-        Logger logger = LoggerFactory.getLogger(this.getClass());
-        logger.info("\n" + "[能力调用][调用方]" + ip +"\n"
-                + "[能力调用][URL]" + url +"\n"
-                + "[能力调用][参数]" + request.getQueryString() +"\n"
-                + "[能力调用][响应]" + msg +"\n"
-        );
     }
 
     public String getUrl() {
