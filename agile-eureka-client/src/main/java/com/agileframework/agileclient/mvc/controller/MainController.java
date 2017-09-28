@@ -4,6 +4,7 @@ import com.agileframework.agileclient.common.base.Head;
 import com.agileframework.agileclient.common.base.RETURN;
 import com.agileframework.agileclient.common.base.Constant;
 import com.agileframework.agileclient.common.exception.NoSuchRequestServiceException;
+import com.agileframework.agileclient.common.exception.UnlawfulRequestException;
 import com.agileframework.agileclient.common.server.ServiceInterface;
 import com.agileframework.agileclient.common.util.FactoryUtil;
 import com.agileframework.agileclient.common.util.ServletUtil;
@@ -38,17 +39,10 @@ public class MainController {
 
     /**
      * 非法请求处理器
-     * @param request 请求对象
-     * @return 响应视图
      */
     @RequestMapping(value = {"/","/*","/*/*/*/**"})
-    public ModelAndView processor(HttpServletRequest request){
-        //初始化参数
-        ModelAndView modelAndView = new ModelAndView();
-
-        //判断模块存在
-        modelAndView.addObject(Constant.ResponseAbout.HEAD,new Head(RETURN.NO_COMPLETE,request));
-        return modelAndView;
+    public void processor() throws UnlawfulRequestException {
+        throw new UnlawfulRequestException();
     }
 
     /**
@@ -121,6 +115,9 @@ public class MainController {
         //响应数据装填
         modelAndView.addObject(Constant.ResponseAbout.RESULT, this.getService().getOutParam());
 
+        this.getService().clear();
+        this.service.remove();
+
         return modelAndView;
     }
 
@@ -142,7 +139,12 @@ public class MainController {
      * @param request   servlet请求
      */
     private void handleRequestUrl(HttpServletRequest request) {
-        HashMap<String, Object> inParam = new HashMap<>();
+        Map<String, Object> inParam = new HashMap<>();
+        if (request.getParameterMap().size()>0){
+            for (Map.Entry<String,String[]> map:request.getParameterMap().entrySet() ) {
+                inParam.put(map.getKey(),map.getValue()[0]);
+            }
+        }
 
         //---------------------------------请求参数解析------------------------------------
         String queryString = request.getQueryString();

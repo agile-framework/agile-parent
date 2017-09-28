@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by 佟盟 on 2017/1/9
@@ -20,10 +21,10 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
     private ThreadLocal<org.slf4j.Logger> logger = new ThreadLocal<>();
 
     //输入
-    private ThreadLocal<HashMap<String, Object>> inParam = new ThreadLocal<>();
+    private ThreadLocal<Map<String, Object>> inParam = new ThreadLocal<>();
 
     //输出
-    private ThreadLocal<HashMap<String, Object>> outParam = ThreadLocal.withInitial(HashMap::new);
+    private ThreadLocal<Map<String, Object>> outParam = ThreadLocal.withInitial(HashMap::new);
 
     /**
      * 根据对象及方法名通过反射执行该对象的指定方法
@@ -52,7 +53,7 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * 控制层中调用该方法设置服务入参
      * @param inParam 参数集
      */
-    public void setInParam(HashMap<String, Object> inParam) {
+    public void setInParam(Map<String, Object> inParam) {
         this.inParam.set(inParam);
     }
 
@@ -192,7 +193,7 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * 服务中调用该方法获取入参集合
      * @return 入参集合
      */
-    public HashMap<String, Object> getInParam() {
+    public Map<String, Object> getInParam() {
         return inParam.get();
     }
 
@@ -200,7 +201,7 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * 控制层中调用该方法获取响应参数
      * @return 响应参数集
      */
-    public HashMap<String, Object> getOutParam() {
+    public Map<String, Object> getOutParam() {
         return this.outParam.get();
     }
 
@@ -227,4 +228,11 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
         return this.logger.get();
     }
 
+    /**
+     * 清理
+     */
+    public void clear(){
+        this.inParam.remove();
+        this.outParam.remove();
+    }
 }

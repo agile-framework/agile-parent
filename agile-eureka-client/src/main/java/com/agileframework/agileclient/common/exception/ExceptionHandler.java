@@ -77,6 +77,8 @@ public class ExceptionHandler implements HandlerExceptionResolver {
             r = RETURN.NO_SERVICE;
         }else if (e instanceof NoSuchRequestMethodException){
             r = RETURN.NO_METHOD;
+        }else if (e instanceof UnlawfulRequestException){
+            r = RETURN.NO_COMPLETE;
         }
 
         modelAndView.addObject(Constant.ResponseAbout.HEAD,new Head(r,request));
