@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: client-${random.int}
+  boot:
+    admin:
+      client:
+        url: "http://localhost:7076/"
+        username: admin
+        password: admin
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+#  server:
+#    port: 8083
+#    servlet:
+#      context-path: /
+#    ssl:
+#      enabled: false
+
+info:
+  app:
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+
+server:
+  port: 8080
+
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance-id:${server.port}}
+    prefer-ip-address: true
+    appname: ${spring.application.name}
+    hostname: localhost
+    leaseRenewalIntervalInSeconds: 30
+    health-check-url-path: /actuator/health
+#    metadata-map:
+#      management:
+#        port: ${management.server.port}
+  client:
+    registryFetchIntervalSeconds: 30
+    service-url:
+      defaultZone: http://admin:admin@localhost:9090/eureka/
