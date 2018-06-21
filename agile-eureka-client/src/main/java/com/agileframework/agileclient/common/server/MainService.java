@@ -1,14 +1,15 @@
 package com.agileframework.agileclient.common.server;
 
 import com.agileframework.agileclient.common.exception.ExceptionHandler;
-import com.agileframework.agileclient.common.base.RETURN;
 import com.agileframework.agileclient.common.exception.NoSuchRequestMethodException;
-import org.slf4j.LoggerFactory;
+import com.agileframework.agileclient.common.util.ArrayUtil;
+import com.agileframework.agileclient.common.util.ObjectUtil;
+import com.agileframework.agileclient.mvc.model.dao.Dao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,14 +18,14 @@ import java.util.Map;
  */
 public class MainService extends ExceptionHandler implements ServiceInterface {
 
-    //日志工具
-    private ThreadLocal<org.slf4j.Logger> logger = new ThreadLocal<>();
+    @Autowired
+    public Dao dao;
 
     //输入
-    private ThreadLocal<Map<String, Object>> inParam = new ThreadLocal<>();
+    private static ThreadLocal<Map<String, Object>> inParam = new ThreadLocal<>();
 
     //输出
-    private ThreadLocal<Map<String, Object>> outParam = ThreadLocal.withInitial(HashMap::new);
+    private static ThreadLocal<Map<String, Object>> outParam = ThreadLocal.withInitial(HashMap::new);
 
     /**
      * 根据对象及方法名通过反射执行该对象的指定方法
@@ -33,15 +34,14 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * @return 返回执行结果
      */
     @Transactional
-    public RETURN executeMethod(String methodName,Object object) throws Throwable {
-        //初始化日志控件
-        setLogger(LoggerFactory.getLogger(this.getClass()));
+    public Object executeMethod(String methodName, Object object) throws Throwable {
+
+        initOutParam();
 
         try {
-            Method method = this.getClass().getDeclaredMethod(methodName);
-            //取消安全检测，提高性能
+            Method method = this.getClass().getMethod(methodName);
             method.setAccessible(true);
-            return (RETURN) method.invoke(object);
+            return method.invoke(object);
         }catch (NoSuchMethodException e){
             throw new NoSuchRequestMethodException("[方法:" + methodName + "]于[服务类:" + this.getClass().getName() + "]中不存在！");
         }catch (InvocationTargetException e){
@@ -54,7 +54,7 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * @param inParam 参数集
      */
     public void setInParam(Map<String, Object> inParam) {
-        this.inParam.set(inParam);
+        MainService.inParam.set(inParam);
     }
 
     /**
@@ -66,119 +66,69 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
         return inParam.get().get(key);
     }
 
+
     /**
-     * 服务中调用该方法获取字符串入参
+     * 服务中调用该方法获取入参
      * @param key 入参索引字符串
      * @return 入参值
      */
-    protected String getInParamOfString(String key) {
-        return String.valueOf(inParam.get().get(key));
+    protected String getInParam(String key,String defaultValue) {
+        Object value = inParam.get().get(key);
+        if(ObjectUtil.isEmpty(value)){
+            return defaultValue;
+        }
+        return String.valueOf(value);
     }
 
     /**
-     * 服务中调用该方法获取字符串入参
-     * @param key 入参索引字符串
-     * @param defaultValue 默认值
-     * @return 入参值
-     */
-    protected String getInParamOfString(String key,String defaultValue) {
-        return containsKey(key)?String.valueOf(inParam.get().get(key)):defaultValue;
-    }
-
-    /**
-     * 服务中调用该方法获取整数入参
+     * 服务中调用该方法获取指定类型入参
      * @param key 入参索引字符串
      * @return 入参值
      */
-    protected int getInParamOfInteger(String key) {
-        return Integer.parseInt(getInParamOfString(key));
+    protected <T>T getInParam(String key,Class<T> clazz) {
+        return getInParam(key,clazz,null);
     }
 
-    /**
-     * 服务中调用该方法获取整数入参
-     * @param key 入参索引字符串
-     * @param defaultValue 默认值
-     * @return 入参值
-     */
-    protected int getInParamOfInteger(String key,int defaultValue) {
-        return containsKey(key)?Integer.parseInt(getInParamOfString(key)):defaultValue;
-    }
 
     /**
-     * 服务中调用该方法获取浮点入参
-     * @param key 入参索引字符串
-     * @param defaultValue 默认值
-     * @return 入参值
-     */
-    protected float getInParamOfFloat(String key,float defaultValue) {
-        return containsKey(key)?Float.parseFloat(getInParamOfString(key)):defaultValue;
-    }
-
-    /**
-     * 服务中调用该方法获取浮点入参
+     * 服务中调用该方法获取指定类型入参
      * @param key 入参索引字符串
      * @return 入参值
      */
-    protected float getInParamOfFloat(String key) {
-        return Float.parseFloat(getInParamOfString(key));
+    protected <T>T getInParam(String key,Class<T> clazz,T defaultValue) {
+        Object[] value = (Object[]) inParam.get().get(key);
+        if(ObjectUtil.isEmpty(value)){
+            return defaultValue;
+        }
+        Object result = ObjectUtil.cast(clazz, value[0]);
+        return ObjectUtil.isEmpty(result)?null:(T)result;
     }
 
     /**
-     * 服务中调用该方法获取日期入参
-     * @param key 入参索引字符串
-     * @param defaultValue 默认值
-     * @return 入参值
-     */
-    protected Date getInParamOfDate(String key,Date defaultValue) {
-        return containsKey(key)?Date.valueOf(getInParamOfString(key)):defaultValue;
-    }
-
-    /**
-     * 服务中调用该方法获取日期入参
+     * 服务中调用该方法获取字符串数组入参
      * @param key 入参索引字符串
      * @return 入参值
      */
-    protected Date getInParamOfDate(String key) {
-        return Date.valueOf(getInParamOfString(key));
+    protected String[] getInParamOfArray(String key) {
+        String[] value = (String[]) inParam.get().get(key);
+        if(value!=null && value.length==1){
+            return value;
+        }
+        return null;
     }
 
     /**
-     * 服务中调用该方法获取长整形入参
-     * @param key 入参索引字符串
-     * @param defaultValue 默认值
-     * @return 入参值
-     */
-    protected long getInParamOfLong(String key,long defaultValue) {
-        return containsKey(key)?Long.valueOf(getInParamOfString(key)):defaultValue;
-    }
-
-    /**
-     * 服务中调用该方法获取长整形入参
+     * 服务中调用该方法获取指定类型入参
      * @param key 入参索引字符串
      * @return 入参值
      */
-    protected long getInParamOfLong(String key) {
-        return Long.valueOf(getInParamOfString(key));
+    protected <T>T[] getInParamOfArray(String key,Class<T> clazz) {
+        String[] value = (String[]) inParam.get().get(key);
+        if(value!=null && value.length>0){
+            return ArrayUtil.cast(clazz,value);
+        }
+        return null;
     }
-
-    /**
-     * 服务中调用该方法获取布尔形入参
-     * @param defaultValue 默认值
-     * @return 入参值
-     */
-    protected boolean getInParamOfBoolean(String key,boolean defaultValue) {
-        return containsKey(key)?Boolean.valueOf(getInParamOfString(key)):defaultValue;
-    }
-
-    /**
-     * 服务中调用该方法获取布尔形入参
-     * @param key 入参索引字符串
-     * @return 入参值
-     */
-    protected boolean getInParamOfBoolean(String key) {
-        return Boolean.valueOf(getInParamOfString(key));
-    }
-
 
     /**
      * 服务中调用该方判断是否存在入参
@@ -202,7 +152,7 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * @return 响应参数集
      */
     public Map<String, Object> getOutParam() {
-        return this.outParam.get();
+        return outParam.get();
     }
 
     /**
@@ -211,28 +161,20 @@ public class MainService extends ExceptionHandler implements ServiceInterface {
      * @param value 参数值
      */
     public void setOutParam(String key, Object value) {
-        this.outParam.get().put(key,value);
-    }
-
-    /**
-     * 日志工具
-     */
-    public void setLogger(org.slf4j.Logger logger){
-        this.logger.set(logger);
-    }
-
-    /**
-     * 日志工具
-     */
-    public org.slf4j.Logger getLogger(){
-        return this.logger.get();
+        outParam.get().put(key,value);
     }
 
     /**
      * 清理
      */
-    public void clear(){
-        this.inParam.remove();
-        this.outParam.remove();
+    public void initInParam(){
+        inParam.remove();
+    }
+
+    /**
+     * 清理
+     */
+    public void initOutParam(){
+        outParam.remove();
     }
 }
