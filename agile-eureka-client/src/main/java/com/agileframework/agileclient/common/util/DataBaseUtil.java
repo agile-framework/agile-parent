@@ -1,5 +1,7 @@
 package com.agileframework.agileclient.common.util;
 
+import com.agileframework.agileclient.common.exception.NonSupportDBException;
+
 import java.sql.*;
 
 
@@ -7,6 +9,7 @@ import java.sql.*;
  * Created by mydeathtrial on 2017/3/10
  */
 public class DataBaseUtil {
+    public static String type;
     public static ResultSet resultSet;
     public static DatabaseMetaData databaseMetaData;
     public static Statement statement;
@@ -19,14 +22,32 @@ public class DataBaseUtil {
      * @throws SQLException           SQL异常
      */
     public static void initDB() throws ClassNotFoundException, SQLException {
-        PropertiesUtil propertiesUtil = new PropertiesUtil("./src/main/resources/com/agile/configure/agile.properties");
-
         //加载数据库驱动类
-        Class.forName(propertiesUtil.getProperty("agile.druid.driver_class_name"));
+        StringBuilder druidUrl = new StringBuilder();
+        String db = PropertiesUtil.getProperty("agile.jpa.db").toLowerCase();
+        switch (db){
+            case "mysql":
+                type = "mysql";
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                druidUrl.append("jdbc:mysql://").append(PropertiesUtil.getProperty("agile.druid.data_base_ip")).append(":").append(PropertiesUtil.getProperty("agile.druid.data_base_post")).append("/").append(PropertiesUtil.getProperty("agile.druid.data_base_name")).append("?").append(PropertiesUtil.getProperty("agile.druid.data_base_url_param"));
+                break;
+            case "oracle":
+                type = "oracle";
+                Class.forName("oracle.jdbc.driver.OracleDriver");
+                druidUrl.append("jdbc:oracle:thin:@").append(PropertiesUtil.getProperty("agile.druid.data_base_ip")).append(":").append(PropertiesUtil.getProperty("agile.druid.data_base_post")).append(":").append(PropertiesUtil.getProperty("agile.druid.data_base_name"));
+                break;
+            default:
+                try {
+                    throw new NonSupportDBException();
+                } catch (NonSupportDBException e) {
+                    e.printStackTrace();
+                }
+        }
 
         //建立数据库连接
-        if (ObjectUtil.isEmpty(connection))
-            connection = DriverManager.getConnection(propertiesUtil.getProperty("agile.druid.jdbc_url_prefix") + propertiesUtil.getProperty("agile.druid.data_base_ip") + ":" + propertiesUtil.getProperty("agile.druid.data_base_post") + "/" + propertiesUtil.getProperty("agile.druid.data_base_name") + "?" + propertiesUtil.getProperty("agile.druid.data_base_url_param"), propertiesUtil.getProperty("agile.druid.data_base_username"), propertiesUtil.getProperty("agile.druid.data_base_password"));
+        if (ObjectUtil.isEmpty(connection)){
+            connection = DriverManager.getConnection(druidUrl.toString(),PropertiesUtil.getProperty("agile.druid.data_base_username"), PropertiesUtil.getProperty("agile.druid.data_base_password"));
+        }
 
         //数据库信息
         if (ObjectUtil.isEmpty(databaseMetaData)) databaseMetaData = connection.getMetaData();

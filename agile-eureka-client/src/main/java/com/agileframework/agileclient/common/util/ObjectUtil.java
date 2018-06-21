@@ -2,19 +2,23 @@ package com.agileframework.agileclient.common.util;
 
 import org.springframework.util.ObjectUtils;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by 佟盟 on 2017/1/9
  */
 public class ObjectUtil extends ObjectUtils {
     public enum ContainOrExclude{
-        INCLUDE,EXCLUDE,GENERAL
+        INCLUDE,EXCLUDE
     }
 
     /**
@@ -24,33 +28,28 @@ public class ObjectUtil extends ObjectUtils {
      * @param arguments 属性列表
      * @param containOrExclude 包含或排除
      */
-    public static void copyProperties(Object source, Object target, String[] arguments, ContainOrExclude containOrExclude){
+    public static void copyProperties(Object source, Object target, String[] arguments, ContainOrExclude containOrExclude) {
         if (ObjectUtil.isEmpty(source) || ObjectUtil.isEmpty(target)) return;
 
         Field[] sourceFields = source.getClass().getDeclaredFields();
-        Field[] targetFields = target.getClass().getDeclaredFields();
         for (int i = 0 ;i < sourceFields.length ; i++){
-            String property = sourceFields[i].getName();
+            String propertyName = sourceFields[i].getName();
+
             if(!ObjectUtil.isEmpty(arguments)){
                 switch (containOrExclude){
-                    case EXCLUDE:if (Arrays.asList(arguments).contains(property)) continue;
+                    case EXCLUDE:if (ArrayUtil.contains(arguments,propertyName)) continue;
                         break;
-                    case INCLUDE:if (!Arrays.asList(arguments).contains(property)) continue;
+                    case INCLUDE:if (!ArrayUtil.contains(arguments,propertyName)) continue;
                         break;
-                    case GENERAL:break;
                 }
             }
+
             try {
-                Method getMethod = source.getClass().getMethod("get" + StringUtil.toUpperName(property));
-                Method setMethod = target.getClass().getMethod("set" + StringUtil.toUpperName(property));
-                //取消安全检测，提高性能
-                getMethod.setAccessible(true);
-                setMethod.setAccessible(true);
-                Object value = getMethod.invoke(source);
-                setMethod.invoke(value);
-            }catch (Exception e){
-                continue;
-            }
+                Field property = source.getClass().getDeclaredField(propertyName);
+                property.setAccessible(true);
+                Object value = property.get(source);
+                property.set(target,value);
+            }catch (Exception ignored){}
         }
     }
 
@@ -60,7 +59,7 @@ public class ObjectUtil extends ObjectUtils {
      * @param target 新对象
      */
     public static void copyProperties(Object source, Object target){
-        copyProperties(source,target,null, ContainOrExclude.GENERAL);
+        copyProperties(source,target,null,null);
     }
 
 
@@ -80,8 +79,29 @@ public class ObjectUtil extends ObjectUtils {
      * @param target 目标对象
      * @return 是否相同
      */
-    public static boolean compareValue(Object source, Object target) {
+    public static boolean compare(Object source, Object target) {
         return isEmpty(source)?isEmpty(target):(source.equals(target));
+    }
+
+    /**
+     * 比较两个对象属性是否相同
+     * @param source 源对象
+     * @param target 目标对象
+     * @return 是否相同
+     */
+    public static boolean compareValue(Object source, Object target) {
+        if(isEmpty(source)){
+            return isEmpty(target);
+        }else{
+            if(isEmpty(target))return false;
+            try {
+                List<Map<String, Object>> list = getDifferenceProperties(source, target);
+                if(list != null && list.size()>0)return false;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 
     /**
@@ -90,39 +110,32 @@ public class ObjectUtil extends ObjectUtils {
      * @param target 目标对象
      * @return 值不相同的属性列表
      * @throws IllegalAccessException 调用过程异常
-     * @throws InvocationTargetException 调用目标异常
      */
-    public static List<Map<String,Object>> getDifferenceProperties(Object source,Object target) throws IllegalAccessException,InvocationTargetException {
-        if(((compareClass(source, target) && !compareValue(source, target)) || isEmpty(source)) != isEmpty(target)){
-            List<Map<String,Object>> rList = new ArrayList<>();
-            Object object = isEmpty(source)?target:source;
-            Class sourceClass = object.getClass();
-            Method[] methods = sourceClass.getMethods();
-            for (int i = 0 ; i < methods.length ; i++) {
-                Method method = methods[i];
-                String methodName = method.getName();
-                if (!methodName.startsWith("get")) {
-                    continue;
-                }
-                Object sourceValue = isEmpty(source)?null:method.invoke(source);
-                Object targetValue = isEmpty(target)?null:method.invoke(target);
-                Object objectValue = isEmpty(sourceValue)?targetValue:sourceValue;
-
-                if (compareValue(sourceValue,targetValue)) {
-                    continue;
-                }
-                rList.add(new HashMap<String,Object>() {
-                    private static final long serialVersionUID = -3959176970036247143L;
-                    {
-                    put("propertyName", methodName.replace("get", ""));
-                    put("propertyType", objectValue != null ? objectValue.getClass().getName() : null);
+    public static List<Map<String,Object>> getDifferenceProperties(Object source,Object target) throws IllegalAccessException {
+        if(((!compareClass(source, target) || compare(source, target)) || isEmpty(source)) != isEmpty(target))return null;
+        List<Map<String,Object>> result = new ArrayList<>();
+        Object sourceObject = isEmpty(source)?target:source;
+        Object targetObject = isEmpty(source)?source:target;
+        Class sourceClass = sourceObject.getClass();
+        Field[] fields = sourceClass.getDeclaredFields();
+        for(int i = 0 ; i < fields.length ; i++){
+            Field field = fields[i];
+            field.setAccessible(true);
+            Object sourceValue = field.get(sourceObject);
+            Object targetValue = field.get(targetObject);
+            if (compare(sourceValue,targetValue)) {
+                continue;
+            }
+            result.add(new HashMap<String,Object>() {
+                private static final long serialVersionUID = -3959176970036247143L;
+                {
+                    put("propertyName", field.getName());
+                    put("propertyType", field.getType());
                     put("oldValue", sourceValue);
                     put("newValue", targetValue);}
-                });
-            }
-            return rList;
+            });
         }
-        return null;
+        return result;
     }
 
     /**
@@ -131,7 +144,7 @@ public class ObjectUtil extends ObjectUtils {
      * @param map 属性集合
      * @return 返回指定对象类型对象
      */
-    public static  <T> T  getObjectFromMap(Class<T> clazz,Map<String, Object> map){
+    public static  <T> T  getObjectFromMap(Class<T> clazz,Map<String, Object> map) {
         return getObjectFromMap(clazz,map,"","");
     }
 
@@ -141,7 +154,7 @@ public class ObjectUtil extends ObjectUtils {
      * @param map 属性集合
      * @return 返回指定对象类型对象
      */
-    public static  <T> T  getObjectFromMap(Class<T> clazz,Map<String, Object> map, String prefix){
+    public static  <T> T  getObjectFromMap(Class<T> clazz,Map<String, Object> map, String prefix) {
         return getObjectFromMap(clazz,map,prefix,"");
     }
 
@@ -153,59 +166,111 @@ public class ObjectUtil extends ObjectUtils {
      * @return 返回指定对象类型对象
      */
     public static <T> T getObjectFromMap(Class<T> clazz,Map<String, Object> map, String prefix, String suffix) {
-        Object object = null;
+        T object = null;
         try {
             object = clazz.newInstance();
+            if(ObjectUtil.isEmpty(map))return object;
         } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
         Field[] fields = clazz.getDeclaredFields();
         for (int i = 0 ; i < fields.length ; i++) {
             Field field = fields[i];
-            String propertyKey = prefix + field.getName() + suffix;
-            if(map.containsKey(propertyKey)){
-                Class<?> propertyType = field.getType();
-                String propertyValue = map.get(propertyKey).toString();
+            String propertyName = prefix + field.getName() + suffix;
+            if(map.containsKey(propertyName)){
                 try {
-                    Method setMethod = clazz.getDeclaredMethod("set" + StringUtil.toUpperName(propertyKey),propertyType);
-                    setMethod.invoke(object,propertyValue);
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
+                    field.setAccessible(true);
+                    Class<?> type = field.getType();
+                    Object value = map.get(propertyName);
+                    if(!type.isArray() && value.getClass().isArray()){
+                        field.set(object,cast(field.getType(), ((String[])value)[0]));
+                    }else if(type.isArray() && value.getClass().isArray()){
+                        field.set(object,value);
+                    }else{
+                        field.set(object,cast(type,value));
+                    }
+                }catch (Exception ignored){}
+
             }
         }
-        return (T) object;
+        return object;
+    }
+
+    /**
+     * 判断对象非空属性是否存值（排除主键）
+     */
+    public static boolean isValidity(Object object){
+        boolean result = true;
+        if (object==null) return result;
+        Class<?> clazz = object.getClass();
+        Method[] methods = clazz.getDeclaredMethods();
+        for (int i = 0 ; i < methods.length;i++){
+            Method method = methods[i];
+            if(!method.getName().startsWith("get"))continue;
+            try {
+                if(isEmpty(method.getAnnotation(Id.class))){
+                    Column columInfo = method.getAnnotation(Column.class);
+                    if(!isEmpty(columInfo) && columInfo.nullable()){
+                        if(isEmpty(method.invoke(object)))result = false;
+                    }
+                }
+            }catch (Exception e){
+                continue;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 判断对象属性是否全空
+     */
+    public static boolean isAllNullValidity(Object object){
+        boolean result = true;
+        Class<?> clazz = object.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        for (int i = 0 ; i < fields.length;i++){
+            Field field = fields[i];
+            field.setAccessible(true);
+            try {
+                if(!isEmpty(field.get(object)))result = false;
+            }catch (Exception e){
+                continue;
+            }
+        }
+        return result;
     }
 
     /**
      * 对象类型转换
      * @param clazz 类型
-     * @param propertyValue 值
+     * @param value 值
      * @return 转换后的值
      */
-    public static Object cast(Class<?> clazz, Object propertyValue) {
-        String propertyValueStr = String.valueOf(propertyValue);
+    public static Object cast(Class<?> clazz, Object value) {
+        if(ObjectUtil.isEmpty(value))return null;
+        String valueStr = String.valueOf(value);
         if(clazz == Date.class){
-            return Date.valueOf(propertyValueStr);
+            return Date.valueOf(valueStr);
         }
         if(clazz == Long.class|| clazz == long.class ){
-            return Long.parseLong(propertyValueStr);
+            return Long.parseLong(valueStr);
         }
         if(clazz == Integer.class || clazz == int.class ){
-            return Integer.parseInt(propertyValueStr);
+            return Integer.parseInt(valueStr);
         }
         if(clazz == BigDecimal.class){
-            return new BigDecimal(propertyValueStr);
+            return new BigDecimal(valueStr);
         }
         if(clazz == Double.class){
-            return Double.parseDouble(propertyValueStr);
+            return Double.parseDouble(valueStr);
         }
         if(clazz == Float.class){
-            return Float.parseFloat(propertyValueStr);
+            return Float.parseFloat(valueStr);
         }
         if(clazz == Boolean.class){
-            return Boolean.parseBoolean(propertyValueStr);
+            return Boolean.parseBoolean(valueStr);
         }
-        return propertyValueStr;
+        return valueStr;
     }
+
 }

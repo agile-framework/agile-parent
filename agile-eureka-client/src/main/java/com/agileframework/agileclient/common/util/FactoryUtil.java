@@ -1,5 +1,6 @@
 package com.agileframework.agileclient.common.util;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,7 @@ public final class FactoryUtil {
      * @param beanName bean名
      * @return bean对象
      */
-    public static Object getBean(String beanName){
+    public static Object getBean(String beanName) throws BeansException {
         return factoryUtil.applicationContext.getBean(beanName.substring(0,1).toLowerCase()+beanName.substring(1));
     }
 
@@ -48,6 +49,15 @@ public final class FactoryUtil {
      */
     public static <T> T getBean(Class<T> clazz){
         return factoryUtil.applicationContext.getBean(clazz);
+    }
+
+    /**
+     * 根据类型查询bean对象
+     * @param var1 bean类型
+     * @return bean对象
+     */
+    public static String[] getBeanNamesForType(Class<?> var1){
+        return factoryUtil.applicationContext.getBeanNamesForType(var1);
     }
 
 }
