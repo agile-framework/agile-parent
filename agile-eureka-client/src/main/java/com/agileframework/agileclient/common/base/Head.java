@@ -1,10 +1,7 @@
 package com.agileframework.agileclient.common.base;
 
 import com.agileframework.agileclient.common.util.ServletUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 
 /**
@@ -12,20 +9,14 @@ import java.io.Serializable;
  */
 public class Head implements Serializable {
     private static final long serialVersionUID = 97555324631150979L;
-    private String url;
     private String ip;
     private String code;
     private String msg;
 
-    public Head(RETURN returnState, HttpServletRequest request) {
-        this.ip = ServletUtil.getCustomerIPAddr(request);
-        this.url = request.getScheme() + "://" + ServletUtil.localhostFormat(request.getLocalAddr())+ ":" + request.getLocalPort() + request.getRequestURI();
+    public Head(RETURN returnState) {
         this.code = returnState.getCode();
         this.msg = returnState.getMsg();
-    }
-
-    public String getUrl() {
-        return url;
+        this.ip = ServletUtil.getLocalIP();
     }
 
     public String getIp() {

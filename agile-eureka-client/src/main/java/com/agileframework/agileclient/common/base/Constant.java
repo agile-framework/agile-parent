@@ -18,6 +18,7 @@ public class Constant {
         public final static String METHOD = "method";
         public final static String IP = "ip";
         public final static String URL = "url";
+        public final static String RETURN = "return";
     }
 
     /**
@@ -28,6 +29,7 @@ public class Constant {
         public final static String FILE_SIZE = "fileSize";
         public final static String CONTENT_TYPE = "contentType";
         public final static String UP_LOUD_FILE_INFO = "upLoadFileInfo";
+        public final static String SERVICE_LOGGER_FILE = "service";
     }
 
     /**
@@ -37,14 +39,24 @@ public class Constant {
         public final static String ATTACHMENT = "attachment";
     }
 
+    /**
+     * 正则表达式
+     */
     public static class RegularAbout {
         public final static String NULL = "";
+        public final static String COLON = ":";
+        public final static String SPOT = ".";
+        public final static String COMMA = ",";
         public final static String QUESTION_MARK = "?";
         public final static String SLASH = "/";
         public final static String BACKSLASH = "\\";
         public final static String AND = "&";
         public final static String EQUAL = "=";
-        public final static String AFTER_PARAM = "forward[-_*%#$@+=()^!~`|.,/a-zA-Z0-9]+[&]?";
         public final static String HUMP = "((?=[\\x21-\\x7e]+)[^A-Za-z0-9])";
+        public final static String UPER = "[A-Z]";
+        public final static String HTTP = "http";
+        public final static String HTTPS = "https";
+        public final static String FORWARD = "forward";
+        public final static String REDIRECT = "redirect";
     }
 }
