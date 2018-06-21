@@ -1,9 +1,11 @@
 package com.agileframework.agileclient.common.filter;
 
 import com.agileframework.agileclient.common.util.StringUtil;
-import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebInitParam;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -13,10 +15,7 @@ import java.util.List;
 /**
  * Created by 佟盟 on 2017/9/25
  */
-@WebFilter(filterName = "CORSFilter",urlPatterns = "/*",initParams = {
-        @WebInitParam(name = "allowOrigin",value = "www.agileframework.com"),@WebInitParam(name = "allowMethods",value = "GET,POST,PUT,DELETE,OPTIONS"),@WebInitParam(name = "allowCredentials",value = "true"),@WebInitParam(name = "allowHeaders",value = "Content-Type")
-})
-public class CORSFilter implements Filter {
+public class CORSFilter extends OncePerRequestFilter implements Filter {
     private String allowOrigin;
     private String allowMethods;
     private String allowCredentials;
@@ -24,46 +23,51 @@ public class CORSFilter implements Filter {
     private String exposeHeaders;
 
     @Override
-    public void init(FilterConfig filterConfig) {
-        allowOrigin = filterConfig.getInitParameter("allowOrigin");
-        allowMethods = filterConfig.getInitParameter("allowMethods");
-        allowCredentials = filterConfig.getInitParameter("allowCredentials");
-        allowHeaders = filterConfig.getInitParameter("allowHeaders");
-        exposeHeaders = filterConfig.getInitParameter("exposeHeaders");
-    }
-
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
+    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         if (allowOrigin.equals("*") || StringUtil.isEmpty(allowOrigin)){
-            response.setHeader("Access-Control-Allow-Origin", allowOrigin);
+            httpServletResponse.setHeader("Access-Control-Allow-Origin", allowOrigin);
         }else{
             List<String> allowOriginList = Arrays.asList(allowOrigin.split(","));
-            String currentOrigin = request.getHeader("Origin");
+            String currentOrigin = httpServletRequest.getHeader("Origin");
             if (allowOriginList.contains(currentOrigin)) {
-                response.setHeader("Access-Control-Allow-Origin", currentOrigin);
+                httpServletResponse.setHeader("Access-Control-Allow-Origin", currentOrigin);
             }
         }
         if (StringUtil.isNotEmpty(allowOrigin)) {
-            response.setHeader("Access-Control-Allow-Origin", allowOrigin);
+            httpServletResponse.setHeader("Access-Control-Allow-Origin", allowOrigin);
         }
         if (StringUtil.isNotEmpty(allowMethods)) {
-            response.setHeader("Access-Control-Allow-Methods", allowMethods);
+            httpServletResponse.setHeader("Access-Control-Allow-Methods", allowMethods);
         }
         if (StringUtil.isNotEmpty(allowCredentials)) {
-            response.setHeader("Access-Control-Allow-Credentials", allowCredentials);
+            httpServletResponse.setHeader("Access-Control-Allow-Credentials", allowCredentials);
         }
         if (StringUtil.isNotEmpty(allowHeaders)) {
-            response.setHeader("Access-Control-Allow-Headers", allowHeaders);
+            httpServletResponse.setHeader("Access-Control-Allow-Headers", allowHeaders);
         }
         if (StringUtil.isNotEmpty(exposeHeaders)) {
-            response.setHeader("Access-Control-Expose-Headers", exposeHeaders);
+            httpServletResponse.setHeader("Access-Control-Expose-Headers", exposeHeaders);
         }
-        chain.doFilter(req, res);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
-    @Override
-    public void destroy() {
+    public void setAllowOrigin(String allowOrigin) {
+        this.allowOrigin = allowOrigin;
+    }
+
+    public void setAllowMethods(String allowMethods) {
+        this.allowMethods = allowMethods;
+    }
+
+    public void setAllowCredentials(String allowCredentials) {
+        this.allowCredentials = allowCredentials;
+    }
+
+    public void setAllowHeaders(String allowHeaders) {
+        this.allowHeaders = allowHeaders;
+    }
+
+    public void setExposeHeaders(String exposeHeaders) {
+        this.exposeHeaders = exposeHeaders;
     }
 }
