@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: eureka-server
+  security:
+    user:
+      name: admin
+      password: admin
+  boot:
+    admin:
+      client:
+        url: "http://localhost:7076/"
+        username: admin
+        password: admin
+        instance:
+          metadata:
+            user.name: admin
+            user.password: admin
+server:
+  port: 9090
+
+info:
+  app:
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+
+management:
+  server:
+    servlet:
+      context-path: /
+
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance-id:${server.port}}
+    prefer-ip-address: true
+    appname: ${spring.application.name}
+    hostname: localhost
+    leaseRenewalIntervalInSeconds: 30
+    health-check-url-path: /actuator/health
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://${spring.security.user.name}:${spring.security.user.password}@${eureka.instance.hostname}:${server.port}/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
