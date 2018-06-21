@@ -1,32 +1,26 @@
 package com.agileframework.agileclient.mvc.controller;
 
+import com.agileframework.agileclient.common.base.Constant;
 import com.agileframework.agileclient.common.base.Head;
 import com.agileframework.agileclient.common.base.RETURN;
-import com.agileframework.agileclient.common.base.Constant;
+import com.agileframework.agileclient.common.base.RequestWrapper;
 import com.agileframework.agileclient.common.exception.NoSuchRequestServiceException;
 import com.agileframework.agileclient.common.exception.UnlawfulRequestException;
 import com.agileframework.agileclient.common.server.ServiceInterface;
 import com.agileframework.agileclient.common.util.FactoryUtil;
-import com.agileframework.agileclient.common.util.ServletUtil;
+import com.agileframework.agileclient.common.util.FileUtil;
+import com.agileframework.agileclient.common.util.ObjectUtil;
 import com.agileframework.agileclient.common.util.StringUtil;
-import org.apache.commons.io.FileUtils;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.Charset;
-import java.util.*;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 主控制层
@@ -35,7 +29,11 @@ import java.util.*;
 @Controller
 public class MainController {
 
-    private ThreadLocal<ServiceInterface> service = new ThreadLocal<>();
+    //服务缓存变量
+    private static ThreadLocal<ServiceInterface> service = new ThreadLocal<>();
+
+    //request缓存变量
+    private static ThreadLocal<HttpServletRequest> request = new ThreadLocal<>();
 
     /**
      * 非法请求处理器
@@ -47,78 +45,107 @@ public class MainController {
 
     /**
      * agile框架处理器
-     * @param request 请求对象
      * @param service 服务名
      * @param method 方法名
-     * @param forward 转发信息
      * @return 响应试图数据
-     * @throws IllegalAccessException 非法访问异常
-     * @throws IllegalArgumentException 非法参数异常
-     * @throws InvocationTargetException 调用目标异常
-     * @throws NoSuchMethodException 没有这样的方法异常
-     * @throws SecurityException 安全异常
      */
     @RequestMapping(value = "/{service}/{method}")
-    public ModelAndView processor(
-            HttpServletRequest request,
+    public Object processor(
+            HttpServletRequest currentRequest,
+            HttpServletResponse currentResponse,
             @PathVariable String service,
-            @PathVariable String method,
-            @RequestParam(value = "forward", required = false) String forward,
-            @RequestParam(value = "file-path", required = false) String filePath
+            @PathVariable String method
     ) throws Throwable {
+        //清理缓存
+        clear();
+
         //初始化参数
-        ModelAndView modelAndView = new ModelAndView();//响应视图对象
         service =  StringUtil.toLowerName(service);//设置服务名
         method = StringUtil.toLowerName(method);//设置方法名
         initService(service);
+        request.set(currentRequest);
 
-        //调用目标方法前处理入参
-        handleRequestUrl(request);
+        //处理入参
+        handleInParam();
 
         //调用目标方法
-        RETURN returnState = this.getService().executeMethod(method,this.getService());
+        Object returnData = getService().executeMethod(method,getService());
 
-        //判断是否存在文件上传
-        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
-        if (!StringUtil.isEmpty(filePath) && multipartResolver.isMultipart(request)){
-            this.upLoadFile(request, filePath);
+        //获取出参
+        Map<String, Object> outParam = getService().getOutParam();
+
+        //判断是否跳转
+        if(outParam.containsKey(Constant.RegularAbout.FORWARD)){
+            return jump(Constant.RegularAbout.FORWARD);
+        }
+        if(outParam.containsKey(Constant.RegularAbout.REDIRECT)){
+            return jump(Constant.RegularAbout.REDIRECT);
         }
 
-        //判断是否转发
-        if (!StringUtil.isEmpty(forward) && RETURN.SUCCESS.equals(returnState)) {
-            StringBuilder url = new StringBuilder(forward);
-            if(!forward.startsWith(Constant.RegularAbout.SLASH)){
-                url.insert(0,Constant.RegularAbout.SLASH);
-            }
+        //处理响应视图
+        ModelAndView modelAndView = new ModelAndView();//响应视图对象
 
-            //过滤转发并获取请求参数，避免重复转发
-            String beforeParam = request.getQueryString().replaceFirst(Constant.RegularAbout.AFTER_PARAM, Constant.RegularAbout.NULL);
-
-            //服务间参数传递
-            String afterParam = StringUtil.fromMapToUrl(this.getService().getOutParam());
-
-
-            url = (StringUtil.isEmpty(beforeParam) && StringUtil.isEmpty(afterParam))?url
-                    :(StringUtil.compareTo(beforeParam,afterParam)>0)?url.append(Constant.RegularAbout.QUESTION_MARK).append(beforeParam).append(Constant.RegularAbout.AND).append(afterParam)
-                    :url.append(Constant.RegularAbout.QUESTION_MARK).append(afterParam).append(Constant.RegularAbout.AND).append(beforeParam);
-            url = url.toString().endsWith(Constant.RegularAbout.AND)?url.deleteCharAt(url.lastIndexOf(Constant.RegularAbout.AND)):url;
-
-            //转发
-            modelAndView.setView(new RedirectView(url.toString()));
-
-            return modelAndView;
+        if(ObjectUtil.isEmpty(returnData)){
+            modelAndView.addObject(Constant.ResponseAbout.HEAD, new Head(RETURN.SUCCESS));
+        } else if(returnData instanceof RETURN){
+            modelAndView.addObject(Constant.ResponseAbout.HEAD, new Head((RETURN)returnData));
+        } else {
+            modelAndView.addObject(Constant.ResponseAbout.HEAD, new Head(RETURN.SUCCESS));
+            outParam.put(Constant.ResponseAbout.RETURN,returnData);
         }
 
-        //调用目标方法后处理视图
-        modelAndView.addObject(Constant.ResponseAbout.HEAD, new Head(returnState, request));
-
-        //响应数据装填
-        modelAndView.addObject(Constant.ResponseAbout.RESULT, this.getService().getOutParam());
-
-        this.getService().clear();
-        this.service.remove();
+        modelAndView.addObject(Constant.ResponseAbout.RESULT, outParam);
+        //清理缓存
+        clear();
 
         return modelAndView;
+    }
+
+    /**
+     * 由于线程池的使用与threadLocal冲突,前后需要清理缓存
+     */
+    private void clear(){
+        service.remove();
+        request.remove();
+    }
+
+    /**
+     * 转发
+     * @param jumpMethod 跳转方式
+     */
+    private ModelAndView jump(String jumpMethod){
+        Map<String, Object> outParam = getService().getOutParam();
+        Map<String, Object> inParam = getService().getInParam();
+
+        ModelAndView model = new ModelAndView(exposeJumpUrl(jumpMethod,outParam));
+        model.addAllObjects(outParam);
+        model.addAllObjects(inParam);
+        return model;
+    }
+
+    /**
+     * 处理跳转地址及参数
+     * @param jumpMethod 跳转方式
+     * @param outParam 跳转之前的输出参数
+     * @return 用于跳转的目标地址
+     */
+    private String exposeJumpUrl(String jumpMethod,Map<String, Object> outParam){
+        //获取跳转地址
+        String resourceUrl = outParam.get(jumpMethod).toString();
+
+        StringBuilder url = new StringBuilder(jumpMethod+ Constant.RegularAbout.COLON);
+        //补充斜杠
+        if(!resourceUrl.startsWith(Constant.RegularAbout.HTTP) && !resourceUrl.startsWith(Constant.RegularAbout.SLASH)){
+            url.append(Constant.RegularAbout.SLASH);
+        }
+        url.append(resourceUrl);
+        //补充问号
+        if(!resourceUrl.contains(Constant.RegularAbout.QUESTION_MARK)){
+            url.append(Constant.RegularAbout.QUESTION_MARK);
+        }
+        //移除本跳转防止死循环
+        outParam.remove(jumpMethod);
+        return url.toString();
     }
 
     /**
@@ -127,133 +154,44 @@ public class MainController {
      */
     private void initService(String serviceName)throws NoSuchRequestServiceException {
         try {
-            Object service = FactoryUtil.getBean(serviceName);
-            this.setService((ServiceInterface) service);
+            service.set((ServiceInterface) FactoryUtil.getBean(serviceName));
         }catch (Exception e){
-            throw new NoSuchRequestServiceException("[服务类:" + serviceName + "]于系统中不存在！");
+            throw new NoSuchRequestServiceException();
         }
     }
 
     /**
      * 根据servlet请求、认证信息、目标服务名、目标方法名处理入参
-     * @param request   servlet请求
      */
-    private void handleRequestUrl(HttpServletRequest request) {
-        Map<String, Object> inParam = new HashMap<>();
-        if (request.getParameterMap().size()>0){
-            for (Map.Entry<String,String[]> map:request.getParameterMap().entrySet() ) {
-                inParam.put(map.getKey(),map.getValue()[0]);
+    private void handleInParam() {
+        getService().initInParam();
+        HttpServletRequest currentRequest = request.get();
+        Map<String,Object> inParam = new HashMap<>();
+        Map<String, String[]> parameterMap = currentRequest.getParameterMap();
+        if (parameterMap.size()>0){
+            for (Map.Entry<String,String[]> map:parameterMap.entrySet() ) {
+                inParam.put(map.getKey(),map.getValue());
             }
         }
 
-        //---------------------------------请求参数解析------------------------------------
-        String queryString = request.getQueryString();
-        if (!StringUtil.isEmpty(queryString)){
-            String[] params = queryString.split(Constant.RegularAbout.AND),paramContainer;
-            for (int i = 0 ; i < params.length ; i++) {
-                paramContainer = params[i].split(Constant.RegularAbout.EQUAL);
-                if (paramContainer.length == 2){
-                    inParam.put(paramContainer[0],paramContainer[1]);
-                }
+        if (currentRequest instanceof RequestWrapper){
+            Map<String, Object> forwardMap = ((RequestWrapper) currentRequest).getForwardParameterMap();
+            for (Map.Entry<String,Object> map:forwardMap.entrySet() ) {
+                inParam.put(map.getKey(),map.getValue());
             }
+        }
+
+        //判断是否存在文件上传
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(currentRequest.getSession().getServletContext());
+        if (multipartResolver.isMultipart(currentRequest)){
+            inParam.putAll(FileUtil.getFileFormRequest(currentRequest));
         }
 
         //将处理过的所有请求参数传入调用服务对象
-        this.getService().setInParam(inParam);
-    }
-
-    /**
-     * 文件下载
-     * @param request  请求对象
-     * @param path  文件存储路径
-     */
-    private void upLoadFile(HttpServletRequest request, String path){
-        List<HashMap<String,Object>> list = new ArrayList<>();
-
-        //转换成多部分request
-        MultipartHttpServletRequest multipartHttpServletRequest = (MultipartHttpServletRequest) request;
-
-        //获取所有文件提交的input名
-        Iterator<String> iterator = multipartHttpServletRequest.getFileNames();
-        while (iterator.hasNext()) {
-            List<MultipartFile> files = multipartHttpServletRequest.getFiles(iterator.next());
-            for (int i = 0 ; i < files.size();i++){
-                MultipartFile file = files.get(i);
-                String fileName = file.getOriginalFilename();
-                HashMap<String,Object> map = new HashMap<>();
-                map.put(Constant.FileAbout.FILE_NAME,fileName);
-                map.put(Constant.FileAbout.FILE_SIZE,file.getSize());
-                map.put(Constant.FileAbout.CONTENT_TYPE,file.getContentType());
-
-                //判断文件名
-                if (StringUtil.isEmpty(fileName)) {
-                    map.put(Constant.ResponseAbout.STATE,RETURN.EMPTY_FILENAME.getCode());
-                    map.put(Constant.ResponseAbout.MSG,RETURN.EMPTY_FILENAME.getMsg());
-                    list.add(map);
-                    continue;
-                }
-
-                //判断文件内容为空
-                if (file.isEmpty()) {
-                    map.put(Constant.ResponseAbout.STATE,RETURN.EMPTY_FILE.getCode());
-                    map.put(Constant.ResponseAbout.MSG,RETURN.EMPTY_FILE.getMsg());
-                    list.add(map);
-                    continue;
-                }
-                File newFile = new File(path,fileName);
-
-                //尝试创建文件夹
-                if (!newFile.getParentFile().exists() && !newFile.getParentFile().mkdirs()) {
-                    map.put(Constant.ResponseAbout.STATE,RETURN.MADE_DIR_FAIL.getCode());
-                    map.put(Constant.ResponseAbout.MSG,RETURN.MADE_DIR_FAIL.getMsg());
-                    list.add(map);
-                    continue;
-                }
-
-                //尝试文件复制
-                try {
-                    file.transferTo(newFile);
-                    map.put(Constant.ResponseAbout.STATE,RETURN.UPLOAD_SUCCESS.getCode());
-                    map.put(Constant.ResponseAbout.MSG,RETURN.UPLOAD_SUCCESS.getMsg());
-
-                }catch (Exception e){
-                    map.put(Constant.ResponseAbout.STATE,RETURN.UPLOAD_ERROR.getCode());
-                    map.put(Constant.ResponseAbout.MSG,RETURN.UPLOAD_ERROR.getMsg());
-                }
-                list.add(map);
-            }
-        }
-        this.getService().setOutParam(Constant.FileAbout.UP_LOUD_FILE_INFO,list);
-    }
-
-    /**
-     * 文件下载
-     * @param path 文件路径
-     * @param fileName 文件名
-     * @return 文件流
-     * @throws FileNotFoundException 流异常
-     */
-    @RequestMapping("/download")
-    private ResponseEntity<byte[]> downloadFile(@RequestParam(value = "path") String path ,@RequestParam(value = "fileName") String fileName) throws FileNotFoundException{
-        File file = new File(path,fileName);
-        byte[] byteFile;
-        try {
-            byteFile = FileUtils.readFileToByteArray(file);
-        }catch (IOException e){
-            throw new FileNotFoundException();
-        }
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        headers.setContentLength(file.length());
-        headers.setContentDispositionFormData(Constant.HeaderAbout.ATTACHMENT,new String(fileName.getBytes(Charset.forName("UTF-8")),Charset.forName("ISO-8859-1")));
-        return new ResponseEntity<>(byteFile, headers, HttpStatus.CREATED);
+        getService().setInParam(inParam);
     }
 
     private ServiceInterface getService() {
         return service.get();
-    }
-
-    private void setService(ServiceInterface service) {
-        this.service.set(service);
     }
 }
