@@ -1,4 +1,4 @@
-package com.agileframework.agileclient.common.configure;
+package com.agileframework.agileclient.common.view;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -18,5 +18,6 @@ public class JsonView extends MappingJackson2JsonView {
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         this.setPrettyPrint(true);
         this.setObjectMapper(objectMapper);
+        this.setBeanName("jsonView");
     }
 }
