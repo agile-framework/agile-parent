@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: agile-manager
+  security:
+    user:
+      name: admin
+      password: admin
+
+management:
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+info:
+  app:
+    name: "@project.name@"
+    description: "@project.description@"
+    version: "@project.version@"
+
+server:
+  port: 7076
+
+eureka:
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.cloud.client.ip-address}:${spring.application.instance-id:${server.port}}
+    prefer-ip-address: true
+    appname: ${spring.application.name}
+    hostname: localhost
+    leaseRenewalIntervalInSeconds: 30
+    health-check-url-path: /actuator/health
+  client:
+    registryFetchIntervalSeconds: 30
+    service-url:
+      defaultZone: http://admin:admin@localhost:9090/eureka/
