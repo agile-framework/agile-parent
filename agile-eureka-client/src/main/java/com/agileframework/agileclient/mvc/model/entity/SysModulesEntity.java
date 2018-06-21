@@ -1,48 +1,53 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "sys_modules",  catalog = "agile_db")
+@Remark("[系统管理]模块")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class SysModulesEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //唯一标识
+    @Remark("唯一标识")
     private Integer sysModulesId;
-    //模块名称
+    @Remark("模块名称")
     private String moduleName;
-    //模块说明
+    @Remark("模块说明")
     private String moduleDesc;
-    //模块类型
+    @Remark("模块类型")
     private String moduleType;
-    //模块上级
+    @Remark("模块上级")
     private String parent;
-    //模块地址
+    @Remark("模块地址")
     private String moduleUrl;
-    //菜单级别
+    @Remark("菜单级别")
     private String iLevel;
-    //最下级
+    @Remark("最下级")
     private String leaf;
-    //应用名称
+    @Remark("应用名称")
     private String application;
-    //控制器名称
+    @Remark("控制器名称")
     private String controller;
-    //是否可用
-    private boolean enable;
-    //优先级
+    @Remark("是否可用")
+    private Boolean enable;
+    @Remark("优先级")
     private String priority;
 
     //无参构造器
     public SysModulesEntity(){}
 
     //有参构造器
-    public SysModulesEntity(Integer sysModulesId,String moduleName,String moduleDesc,String moduleType,String parent,String moduleUrl,String iLevel,String leaf,String application,String controller,boolean enable,String priority){
+    public SysModulesEntity(Integer sysModulesId,String moduleName,String moduleDesc,String moduleType,String parent,String moduleUrl,String iLevel,String leaf,String application,String controller,Boolean enable,String priority){
         this.sysModulesId = sysModulesId;
         this.moduleName = moduleName;
         this.moduleDesc = moduleDesc;
@@ -59,7 +64,7 @@ public class SysModulesEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "sys_modules_id" )
+    @Column(name = "sys_modules_id" , nullable = false )
     public Integer getSysModulesId() {
         return sysModulesId;
     }
@@ -69,7 +74,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "module_name" )
+    @Column(name = "module_name" , nullable = false )
     public String getModuleName() {
         return moduleName;
     }
@@ -79,7 +84,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "module_desc" , nullable = false )
+    @Column(name = "module_desc" )
     public String getModuleDesc() {
         return moduleDesc;
     }
@@ -89,7 +94,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "module_type" , nullable = false )
+    @Column(name = "module_type" )
     public String getModuleType() {
         return moduleType;
     }
@@ -99,7 +104,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "parent" , nullable = false )
+    @Column(name = "parent" )
     public String getParent() {
         return parent;
     }
@@ -109,7 +114,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "module_url" , nullable = false )
+    @Column(name = "module_url" )
     public String getModuleUrl() {
         return moduleUrl;
     }
@@ -119,7 +124,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "i_level" , nullable = false )
+    @Column(name = "i_level" )
     public String getILevel() {
         return iLevel;
     }
@@ -129,7 +134,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "leaf" , nullable = false )
+    @Column(name = "leaf" )
     public String getLeaf() {
         return leaf;
     }
@@ -139,7 +144,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "application" , nullable = false )
+    @Column(name = "application" )
     public String getApplication() {
         return application;
     }
@@ -149,7 +154,7 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "controller" , nullable = false )
+    @Column(name = "controller" )
     public String getController() {
         return controller;
     }
@@ -159,17 +164,17 @@ public class SysModulesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "enable" , nullable = false )
-    public boolean getEnable() {
+    @Column(name = "enable" )
+    public Boolean getEnable() {
         return enable;
     }
 
-    public void setEnable(boolean enable) {
+    public void setEnable(Boolean enable) {
         this.enable = enable;
     }
 
     @Basic
-    @Column(name = "priority" , nullable = false )
+    @Column(name = "priority" )
     public String getPriority() {
         return priority;
     }
@@ -180,43 +185,27 @@ public class SysModulesEntity implements Serializable {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SysModulesEntity that = (SysModulesEntity) o;
-
-        return 
-            Objects.equals(sysModulesId, that.sysModulesId)  && 
-            (moduleName != null ? moduleName.equals(that.moduleName) : that.moduleName == null)  && 
-            (moduleDesc != null ? moduleDesc.equals(that.moduleDesc) : that.moduleDesc == null)  && 
-            (moduleType != null ? moduleType.equals(that.moduleType) : that.moduleType == null)  && 
-            (parent != null ? parent.equals(that.parent) : that.parent == null)  && 
-            (moduleUrl != null ? moduleUrl.equals(that.moduleUrl) : that.moduleUrl == null)  && 
-            (iLevel != null ? iLevel.equals(that.iLevel) : that.iLevel == null)  && 
-            (leaf != null ? leaf.equals(that.leaf) : that.leaf == null)  && 
-            (application != null ? application.equals(that.application) : that.application == null)  && 
-            (controller != null ? controller.equals(that.controller) : that.controller == null)  && 
-            enable == that.enable  && 
-            (priority != null ? priority.equals(that.priority) : that.priority == null) ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof SysModulesEntity)) return false;
+        SysModulesEntity that = (SysModulesEntity) object;
+        return Objects.equals(getSysModulesId(), that.getSysModulesId()) &&
+            Objects.equals(getModuleName(), that.getModuleName()) &&
+            Objects.equals(getModuleDesc(), that.getModuleDesc()) &&
+            Objects.equals(getModuleType(), that.getModuleType()) &&
+            Objects.equals(getParent(), that.getParent()) &&
+            Objects.equals(getModuleUrl(), that.getModuleUrl()) &&
+            Objects.equals(getILevel(), that.getILevel()) &&
+            Objects.equals(getLeaf(), that.getLeaf()) &&
+            Objects.equals(getApplication(), that.getApplication()) &&
+            Objects.equals(getController(), that.getController()) &&
+            Objects.equals(getEnable(), that.getEnable()) &&
+            Objects.equals(getPriority(), that.getPriority());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getSysModulesId() != null ? getSysModulesId().hashCode() : 0);
-        result = 31 * result + (moduleName != null ? moduleName.hashCode() : 0);
-        result = 31 * result + (moduleDesc != null ? moduleDesc.hashCode() : 0);
-        result = 31 * result + (moduleType != null ? moduleType.hashCode() : 0);
-        result = 31 * result + (parent != null ? parent.hashCode() : 0);
-        result = 31 * result + (moduleUrl != null ? moduleUrl.hashCode() : 0);
-        result = 31 * result + (iLevel != null ? iLevel.hashCode() : 0);
-        result = 31 * result + (leaf != null ? leaf.hashCode() : 0);
-        result = 31 * result + (application != null ? application.hashCode() : 0);
-        result = 31 * result + (controller != null ? controller.hashCode() : 0);
-        result = 31 * result + (enable ? 1 : 0);
-        result = 31 * result + (priority != null ? priority.hashCode() : 0);
-        return result;
+        return Objects.hash(getSysModulesId(), getModuleName(), getModuleDesc(), getModuleType(), getParent(), getModuleUrl(), getILevel(), getLeaf(), getApplication(), getController(), getEnable(), getPriority());
     }
 
     @Override
@@ -235,5 +224,91 @@ public class SysModulesEntity implements Serializable {
         ",enable=" + enable +
         ",priority='" + priority + '\'' +
         '}';
+    }
+
+    private SysModulesEntity(Builder builder){
+        this.sysModulesId = builder.sysModulesId;
+        this.moduleName = builder.moduleName;
+        this.moduleDesc = builder.moduleDesc;
+        this.moduleType = builder.moduleType;
+        this.parent = builder.parent;
+        this.moduleUrl = builder.moduleUrl;
+        this.iLevel = builder.iLevel;
+        this.leaf = builder.leaf;
+        this.application = builder.application;
+        this.controller = builder.controller;
+        this.enable = builder.enable;
+        this.priority = builder.priority;
+    }
+
+    public static class Builder{
+        private Integer sysModulesId;
+        private String moduleName;
+        private String moduleDesc;
+        private String moduleType;
+        private String parent;
+        private String moduleUrl;
+        private String iLevel;
+        private String leaf;
+        private String application;
+        private String controller;
+        private Boolean enable;
+        private String priority;
+
+        public Builder setSysModulesId(int sysModulesId) {
+            this.sysModulesId = sysModulesId;
+            return this;
+        }
+        public Builder setModuleName(String moduleName) {
+            this.moduleName = moduleName;
+            return this;
+        }
+        public Builder setModuleDesc(String moduleDesc) {
+            this.moduleDesc = moduleDesc;
+            return this;
+        }
+        public Builder setModuleType(String moduleType) {
+            this.moduleType = moduleType;
+            return this;
+        }
+        public Builder setParent(String parent) {
+            this.parent = parent;
+            return this;
+        }
+        public Builder setModuleUrl(String moduleUrl) {
+            this.moduleUrl = moduleUrl;
+            return this;
+        }
+        public Builder setILevel(String iLevel) {
+            this.iLevel = iLevel;
+            return this;
+        }
+        public Builder setLeaf(String leaf) {
+            this.leaf = leaf;
+            return this;
+        }
+        public Builder setApplication(String application) {
+            this.application = application;
+            return this;
+        }
+        public Builder setController(String controller) {
+            this.controller = controller;
+            return this;
+        }
+        public Builder setEnable(Boolean enable) {
+            this.enable = enable;
+            return this;
+        }
+        public Builder setPriority(String priority) {
+            this.priority = priority;
+            return this;
+        }
+        public SysModulesEntity build(){
+            return new SysModulesEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

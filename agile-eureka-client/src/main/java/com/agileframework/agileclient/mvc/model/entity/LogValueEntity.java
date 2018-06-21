@@ -1,31 +1,36 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "log_value",  catalog = "agile_db")
+@Remark("[系统管理]日志相关字段值变动信息")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class LogValueEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //唯一标识
+    @Remark("唯一标识")
     private Integer logValueId;
-    //日志相关表标识
+    @Remark("日志相关表标识")
     private int logTableId;
-    //字段
+    @Remark("字段")
     private String columnName;
-    //字段类型
+    @Remark("字段类型")
     private String columnType;
-    //新值
+    @Remark("新值")
     private String newValue;
-    //旧值
+    @Remark("旧值")
     private String oldValue;
-    //字段含义
+    @Remark("字段含义")
     private String columnInfo;
 
     //无参构造器
@@ -44,7 +49,7 @@ public class LogValueEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "log_value_id" )
+    @Column(name = "log_value_id" , nullable = false )
     public Integer getLogValueId() {
         return logValueId;
     }
@@ -54,7 +59,7 @@ public class LogValueEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "log_table_id" )
+    @Column(name = "log_table_id" , nullable = false )
     public int getLogTableId() {
         return logTableId;
     }
@@ -64,7 +69,7 @@ public class LogValueEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "column_name" )
+    @Column(name = "column_name" , nullable = false )
     public String getColumnName() {
         return columnName;
     }
@@ -74,7 +79,7 @@ public class LogValueEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "column_type" )
+    @Column(name = "column_type" , nullable = false )
     public String getColumnType() {
         return columnType;
     }
@@ -84,7 +89,7 @@ public class LogValueEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "new_value" , nullable = false )
+    @Column(name = "new_value" )
     public String getNewValue() {
         return newValue;
     }
@@ -94,7 +99,7 @@ public class LogValueEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "old_value" , nullable = false )
+    @Column(name = "old_value" )
     public String getOldValue() {
         return oldValue;
     }
@@ -104,7 +109,7 @@ public class LogValueEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "column_info" , nullable = false )
+    @Column(name = "column_info" )
     public String getColumnInfo() {
         return columnInfo;
     }
@@ -115,33 +120,22 @@ public class LogValueEntity implements Serializable {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        LogValueEntity that = (LogValueEntity) o;
-
-        return 
-            Objects.equals(logValueId, that.logValueId)  && 
-            Objects.equals(logTableId, that.logTableId)  && 
-            (columnName != null ? columnName.equals(that.columnName) : that.columnName == null)  && 
-            (columnType != null ? columnType.equals(that.columnType) : that.columnType == null)  && 
-            (newValue != null ? newValue.equals(that.newValue) : that.newValue == null)  && 
-            (oldValue != null ? oldValue.equals(that.oldValue) : that.oldValue == null)  && 
-            (columnInfo != null ? columnInfo.equals(that.columnInfo) : that.columnInfo == null) ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof LogValueEntity)) return false;
+        LogValueEntity that = (LogValueEntity) object;
+        return Objects.equals(getLogValueId(), that.getLogValueId()) &&
+            Objects.equals(getLogTableId(), that.getLogTableId()) &&
+            Objects.equals(getColumnName(), that.getColumnName()) &&
+            Objects.equals(getColumnType(), that.getColumnType()) &&
+            Objects.equals(getNewValue(), that.getNewValue()) &&
+            Objects.equals(getOldValue(), that.getOldValue()) &&
+            Objects.equals(getColumnInfo(), that.getColumnInfo());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getLogValueId() != null ? getLogValueId().hashCode() : 0);
-        result = 31 * result + logTableId;
-        result = 31 * result + (columnName != null ? columnName.hashCode() : 0);
-        result = 31 * result + (columnType != null ? columnType.hashCode() : 0);
-        result = 31 * result + (newValue != null ? newValue.hashCode() : 0);
-        result = 31 * result + (oldValue != null ? oldValue.hashCode() : 0);
-        result = 31 * result + (columnInfo != null ? columnInfo.hashCode() : 0);
-        return result;
+        return Objects.hash(getLogValueId(), getLogTableId(), getColumnName(), getColumnType(), getNewValue(), getOldValue(), getColumnInfo());
     }
 
     @Override
@@ -155,5 +149,61 @@ public class LogValueEntity implements Serializable {
         ",oldValue='" + oldValue + '\'' +
         ",columnInfo='" + columnInfo + '\'' +
         '}';
+    }
+
+    private LogValueEntity(Builder builder){
+        this.logValueId = builder.logValueId;
+        this.logTableId = builder.logTableId;
+        this.columnName = builder.columnName;
+        this.columnType = builder.columnType;
+        this.newValue = builder.newValue;
+        this.oldValue = builder.oldValue;
+        this.columnInfo = builder.columnInfo;
+    }
+
+    public static class Builder{
+        private Integer logValueId;
+        private int logTableId;
+        private String columnName;
+        private String columnType;
+        private String newValue;
+        private String oldValue;
+        private String columnInfo;
+
+        public Builder setLogValueId(int logValueId) {
+            this.logValueId = logValueId;
+            return this;
+        }
+        public Builder setLogTableId(int logTableId) {
+            this.logTableId = logTableId;
+            return this;
+        }
+        public Builder setColumnName(String columnName) {
+            this.columnName = columnName;
+            return this;
+        }
+        public Builder setColumnType(String columnType) {
+            this.columnType = columnType;
+            return this;
+        }
+        public Builder setNewValue(String newValue) {
+            this.newValue = newValue;
+            return this;
+        }
+        public Builder setOldValue(String oldValue) {
+            this.oldValue = oldValue;
+            return this;
+        }
+        public Builder setColumnInfo(String columnInfo) {
+            this.columnInfo = columnInfo;
+            return this;
+        }
+        public LogValueEntity build(){
+            return new LogValueEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

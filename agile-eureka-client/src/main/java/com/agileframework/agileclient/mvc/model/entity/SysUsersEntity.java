@@ -1,57 +1,62 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "sys_users",  catalog = "agile_db")
+@Remark("[系统管理]用户")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class SysUsersEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //唯一标识
+    @Remark("唯一标识")
     private Integer sysUsersId;
-    //用户名
+    @Remark("用户名")
     private String username;
-    //用户姓名
+    @Remark("用户姓名")
     private String name;
-    //密码
+    @Remark("密码")
     private String password;
-    //创建日期
+    @Remark("创建日期")
     private Date dtCreate;
-    //最后登录日期
+    @Remark("最后登录日期")
     private Date lastLogin;
-    //截止日期
+    @Remark("截止日期")
     private Date deadline;
-    //最后登录IP地址
+    @Remark("最后登录IP地址")
     private String loginIp;
-    //所属机构ID
+    @Remark("所属机构ID")
     private String vQzjgid;
-    //所属机构名称
+    @Remark("所属机构名称")
     private String vQzjgmc;
-    //地区编号
+    @Remark("地区编号")
     private String depId;
-    //地区名称
+    @Remark("地区名称")
     private String depName;
-    //是否可用
-    private boolean enabled;
-    //用户是否过期
-    private boolean accountNonExpired;
-    //用户是否锁定
-    private boolean accountNonLocked;
-    //用户证书是否有效
-    private boolean credentialsNonExpired;
+    @Remark("是否可用")
+    private Boolean enabled;
+    @Remark("用户是否过期")
+    private Boolean accountNonExpired;
+    @Remark("用户是否锁定")
+    private Boolean accountNonLocked;
+    @Remark("用户证书是否有效")
+    private Boolean credentialsNonExpired;
 
     //无参构造器
     public SysUsersEntity(){}
 
     //有参构造器
-    public SysUsersEntity(Integer sysUsersId,String username,String name,String password,Date dtCreate,Date lastLogin,Date deadline,String loginIp,String vQzjgid,String vQzjgmc,String depId,String depName,boolean enabled,boolean accountNonExpired,boolean accountNonLocked,boolean credentialsNonExpired){
+    public SysUsersEntity(Integer sysUsersId,String username,String name,String password,Date dtCreate,Date lastLogin,Date deadline,String loginIp,String vQzjgid,String vQzjgmc,String depId,String depName,Boolean enabled,Boolean accountNonExpired,Boolean accountNonLocked,Boolean credentialsNonExpired){
         this.sysUsersId = sysUsersId;
         this.username = username;
         this.name = name;
@@ -72,7 +77,7 @@ public class SysUsersEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "sys_users_id" )
+    @Column(name = "sys_users_id" , nullable = false )
     public Integer getSysUsersId() {
         return sysUsersId;
     }
@@ -82,7 +87,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "username" )
+    @Column(name = "username" , nullable = false )
     public String getUsername() {
         return username;
     }
@@ -92,7 +97,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "name" , nullable = false )
+    @Column(name = "name" )
     public String getName() {
         return name;
     }
@@ -102,7 +107,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "password" )
+    @Column(name = "password" , nullable = false )
     public String getPassword() {
         return password;
     }
@@ -112,7 +117,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "dt_create" , nullable = false )
+    @Column(name = "dt_create" )
     public Date getDtCreate() {
         return dtCreate;
     }
@@ -122,7 +127,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "last_login" , nullable = false )
+    @Column(name = "last_login" )
     public Date getLastLogin() {
         return lastLogin;
     }
@@ -132,7 +137,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "deadline" , nullable = false )
+    @Column(name = "deadline" )
     public Date getDeadline() {
         return deadline;
     }
@@ -142,7 +147,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "login_ip" , nullable = false )
+    @Column(name = "login_ip" )
     public String getLoginIp() {
         return loginIp;
     }
@@ -152,7 +157,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "v_qzjgid" , nullable = false )
+    @Column(name = "v_qzjgid" )
     public String getVQzjgid() {
         return vQzjgid;
     }
@@ -162,7 +167,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "v_qzjgmc" , nullable = false )
+    @Column(name = "v_qzjgmc" )
     public String getVQzjgmc() {
         return vQzjgmc;
     }
@@ -172,7 +177,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "dep_id" , nullable = false )
+    @Column(name = "dep_id" )
     public String getDepId() {
         return depId;
     }
@@ -182,7 +187,7 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "dep_name" , nullable = false )
+    @Column(name = "dep_name" )
     public String getDepName() {
         return depName;
     }
@@ -192,92 +197,72 @@ public class SysUsersEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "enabled" , nullable = false )
-    public boolean getEnabled() {
+    @Column(name = "enabled" )
+    public Boolean getEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 
     @Basic
-    @Column(name = "account_non_expired" , nullable = false )
-    public boolean getAccountNonExpired() {
+    @Column(name = "account_non_expired" )
+    public Boolean getAccountNonExpired() {
         return accountNonExpired;
     }
 
-    public void setAccountNonExpired(boolean accountNonExpired) {
+    public void setAccountNonExpired(Boolean accountNonExpired) {
         this.accountNonExpired = accountNonExpired;
     }
 
     @Basic
-    @Column(name = "account_non_locked" , nullable = false )
-    public boolean getAccountNonLocked() {
+    @Column(name = "account_non_locked" )
+    public Boolean getAccountNonLocked() {
         return accountNonLocked;
     }
 
-    public void setAccountNonLocked(boolean accountNonLocked) {
+    public void setAccountNonLocked(Boolean accountNonLocked) {
         this.accountNonLocked = accountNonLocked;
     }
 
     @Basic
-    @Column(name = "credentials_non_expired" , nullable = false )
-    public boolean getCredentialsNonExpired() {
+    @Column(name = "credentials_non_expired" )
+    public Boolean getCredentialsNonExpired() {
         return credentialsNonExpired;
     }
 
-    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
+    public void setCredentialsNonExpired(Boolean credentialsNonExpired) {
         this.credentialsNonExpired = credentialsNonExpired;
     }
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SysUsersEntity that = (SysUsersEntity) o;
-
-        return 
-            Objects.equals(sysUsersId, that.sysUsersId)  && 
-            (username != null ? username.equals(that.username) : that.username == null)  && 
-            (name != null ? name.equals(that.name) : that.name == null)  && 
-            (password != null ? password.equals(that.password) : that.password == null)  && 
-            (getDtCreate() != null ? getDtCreate().equals(that.getDtCreate()) : that.getDtCreate() == null)  && 
-            (getLastLogin() != null ? getLastLogin().equals(that.getLastLogin()) : that.getLastLogin() == null)  && 
-            (getDeadline() != null ? getDeadline().equals(that.getDeadline()) : that.getDeadline() == null)  && 
-            (loginIp != null ? loginIp.equals(that.loginIp) : that.loginIp == null)  && 
-            (vQzjgid != null ? vQzjgid.equals(that.vQzjgid) : that.vQzjgid == null)  && 
-            (vQzjgmc != null ? vQzjgmc.equals(that.vQzjgmc) : that.vQzjgmc == null)  && 
-            (depId != null ? depId.equals(that.depId) : that.depId == null)  && 
-            (depName != null ? depName.equals(that.depName) : that.depName == null)  && 
-            enabled == that.enabled  && 
-            accountNonExpired == that.accountNonExpired  && 
-            accountNonLocked == that.accountNonLocked  && 
-            credentialsNonExpired == that.credentialsNonExpired ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof SysUsersEntity)) return false;
+        SysUsersEntity that = (SysUsersEntity) object;
+        return Objects.equals(getSysUsersId(), that.getSysUsersId()) &&
+            Objects.equals(getUsername(), that.getUsername()) &&
+            Objects.equals(getName(), that.getName()) &&
+            Objects.equals(getPassword(), that.getPassword()) &&
+            Objects.equals(getDtCreate(), that.getDtCreate()) &&
+            Objects.equals(getLastLogin(), that.getLastLogin()) &&
+            Objects.equals(getDeadline(), that.getDeadline()) &&
+            Objects.equals(getLoginIp(), that.getLoginIp()) &&
+            Objects.equals(getVQzjgid(), that.getVQzjgid()) &&
+            Objects.equals(getVQzjgmc(), that.getVQzjgmc()) &&
+            Objects.equals(getDepId(), that.getDepId()) &&
+            Objects.equals(getDepName(), that.getDepName()) &&
+            Objects.equals(getEnabled(), that.getEnabled()) &&
+            Objects.equals(getAccountNonExpired(), that.getAccountNonExpired()) &&
+            Objects.equals(getAccountNonLocked(), that.getAccountNonLocked()) &&
+            Objects.equals(getCredentialsNonExpired(), that.getCredentialsNonExpired());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getSysUsersId() != null ? getSysUsersId().hashCode() : 0);
-        result = 31 * result + (username != null ? username.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (password != null ? password.hashCode() : 0);
-        result = 31 * result + (getDtCreate() != null ? getDtCreate().hashCode() : 0);
-        result = 31 * result + (getLastLogin() != null ? getLastLogin().hashCode() : 0);
-        result = 31 * result + (getDeadline() != null ? getDeadline().hashCode() : 0);
-        result = 31 * result + (loginIp != null ? loginIp.hashCode() : 0);
-        result = 31 * result + (vQzjgid != null ? vQzjgid.hashCode() : 0);
-        result = 31 * result + (vQzjgmc != null ? vQzjgmc.hashCode() : 0);
-        result = 31 * result + (depId != null ? depId.hashCode() : 0);
-        result = 31 * result + (depName != null ? depName.hashCode() : 0);
-        result = 31 * result + (enabled ? 1 : 0);
-        result = 31 * result + (accountNonExpired ? 1 : 0);
-        result = 31 * result + (accountNonLocked ? 1 : 0);
-        result = 31 * result + (credentialsNonExpired ? 1 : 0);
-        return result;
+        return Objects.hash(getSysUsersId(), getUsername(), getName(), getPassword(), getDtCreate(), getLastLogin(), getDeadline(), getLoginIp(), getVQzjgid(), getVQzjgmc(), getDepId(), getDepName(), getEnabled(), getAccountNonExpired(), getAccountNonLocked(), getCredentialsNonExpired());
     }
 
     @Override
@@ -300,5 +285,115 @@ public class SysUsersEntity implements Serializable {
         ",accountNonLocked=" + accountNonLocked +
         ",credentialsNonExpired=" + credentialsNonExpired +
         '}';
+    }
+
+    private SysUsersEntity(Builder builder){
+        this.sysUsersId = builder.sysUsersId;
+        this.username = builder.username;
+        this.name = builder.name;
+        this.password = builder.password;
+        this.dtCreate = builder.dtCreate;
+        this.lastLogin = builder.lastLogin;
+        this.deadline = builder.deadline;
+        this.loginIp = builder.loginIp;
+        this.vQzjgid = builder.vQzjgid;
+        this.vQzjgmc = builder.vQzjgmc;
+        this.depId = builder.depId;
+        this.depName = builder.depName;
+        this.enabled = builder.enabled;
+        this.accountNonExpired = builder.accountNonExpired;
+        this.accountNonLocked = builder.accountNonLocked;
+        this.credentialsNonExpired = builder.credentialsNonExpired;
+    }
+
+    public static class Builder{
+        private Integer sysUsersId;
+        private String username;
+        private String name;
+        private String password;
+        private Date dtCreate;
+        private Date lastLogin;
+        private Date deadline;
+        private String loginIp;
+        private String vQzjgid;
+        private String vQzjgmc;
+        private String depId;
+        private String depName;
+        private Boolean enabled;
+        private Boolean accountNonExpired;
+        private Boolean accountNonLocked;
+        private Boolean credentialsNonExpired;
+
+        public Builder setSysUsersId(int sysUsersId) {
+            this.sysUsersId = sysUsersId;
+            return this;
+        }
+        public Builder setUsername(String username) {
+            this.username = username;
+            return this;
+        }
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+        public Builder setPassword(String password) {
+            this.password = password;
+            return this;
+        }
+        public Builder setDtCreate(Date dtCreate) {
+            this.dtCreate = dtCreate;
+            return this;
+        }
+        public Builder setLastLogin(Date lastLogin) {
+            this.lastLogin = lastLogin;
+            return this;
+        }
+        public Builder setDeadline(Date deadline) {
+            this.deadline = deadline;
+            return this;
+        }
+        public Builder setLoginIp(String loginIp) {
+            this.loginIp = loginIp;
+            return this;
+        }
+        public Builder setVQzjgid(String vQzjgid) {
+            this.vQzjgid = vQzjgid;
+            return this;
+        }
+        public Builder setVQzjgmc(String vQzjgmc) {
+            this.vQzjgmc = vQzjgmc;
+            return this;
+        }
+        public Builder setDepId(String depId) {
+            this.depId = depId;
+            return this;
+        }
+        public Builder setDepName(String depName) {
+            this.depName = depName;
+            return this;
+        }
+        public Builder setEnabled(Boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+        public Builder setAccountNonExpired(Boolean accountNonExpired) {
+            this.accountNonExpired = accountNonExpired;
+            return this;
+        }
+        public Builder setAccountNonLocked(Boolean accountNonLocked) {
+            this.accountNonLocked = accountNonLocked;
+            return this;
+        }
+        public Builder setCredentialsNonExpired(Boolean credentialsNonExpired) {
+            this.credentialsNonExpired = credentialsNonExpired;
+            return this;
+        }
+        public SysUsersEntity build(){
+            return new SysUsersEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

@@ -1,42 +1,47 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "sys_resources",  catalog = "agile_db")
+@Remark("[系统管理]资源")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class SysResourcesEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //唯一标识
+    @Remark("唯一标识")
     private Integer sysResourcesId;
-    //资源类型
+    @Remark("资源类型")
     private String resourceType;
-    //资源名称
+    @Remark("资源名称")
     private String resourceName;
-    //资源描述
+    @Remark("资源描述")
     private String resourceDesc;
-    //资源路径
+    @Remark("资源路径")
     private String resourcePath;
-    //优先级
+    @Remark("优先级")
     private String priority;
-    //是否可用
-    private boolean enable;
-    //是否系统权限
-    private boolean issys;
-    //模块
+    @Remark("是否可用")
+    private Boolean enable;
+    @Remark("是否系统权限")
+    private Boolean issys;
+    @Remark("模块")
     private int moduleId;
 
     //无参构造器
     public SysResourcesEntity(){}
 
     //有参构造器
-    public SysResourcesEntity(Integer sysResourcesId,String resourceType,String resourceName,String resourceDesc,String resourcePath,String priority,boolean enable,boolean issys,int moduleId){
+    public SysResourcesEntity(Integer sysResourcesId,String resourceType,String resourceName,String resourceDesc,String resourcePath,String priority,Boolean enable,Boolean issys,int moduleId){
         this.sysResourcesId = sysResourcesId;
         this.resourceType = resourceType;
         this.resourceName = resourceName;
@@ -50,7 +55,7 @@ public class SysResourcesEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "sys_resources_id" )
+    @Column(name = "sys_resources_id" , nullable = false )
     public Integer getSysResourcesId() {
         return sysResourcesId;
     }
@@ -60,7 +65,7 @@ public class SysResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "resource_type" , nullable = false )
+    @Column(name = "resource_type" )
     public String getResourceType() {
         return resourceType;
     }
@@ -70,7 +75,7 @@ public class SysResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "resource_name" , nullable = false )
+    @Column(name = "resource_name" )
     public String getResourceName() {
         return resourceName;
     }
@@ -80,7 +85,7 @@ public class SysResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "resource_desc" , nullable = false )
+    @Column(name = "resource_desc" )
     public String getResourceDesc() {
         return resourceDesc;
     }
@@ -90,7 +95,7 @@ public class SysResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "resource_path" , nullable = false )
+    @Column(name = "resource_path" )
     public String getResourcePath() {
         return resourcePath;
     }
@@ -100,7 +105,7 @@ public class SysResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "priority" , nullable = false )
+    @Column(name = "priority" )
     public String getPriority() {
         return priority;
     }
@@ -110,27 +115,27 @@ public class SysResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "enable" , nullable = false )
-    public boolean getEnable() {
+    @Column(name = "enable" )
+    public Boolean getEnable() {
         return enable;
     }
 
-    public void setEnable(boolean enable) {
+    public void setEnable(Boolean enable) {
         this.enable = enable;
     }
 
     @Basic
-    @Column(name = "issys" , nullable = false )
-    public boolean getIssys() {
+    @Column(name = "issys" )
+    public Boolean getIssys() {
         return issys;
     }
 
-    public void setIssys(boolean issys) {
+    public void setIssys(Boolean issys) {
         this.issys = issys;
     }
 
     @Basic
-    @Column(name = "module_id" , nullable = false )
+    @Column(name = "module_id" )
     public int getModuleId() {
         return moduleId;
     }
@@ -141,37 +146,24 @@ public class SysResourcesEntity implements Serializable {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SysResourcesEntity that = (SysResourcesEntity) o;
-
-        return 
-            Objects.equals(sysResourcesId, that.sysResourcesId)  && 
-            (resourceType != null ? resourceType.equals(that.resourceType) : that.resourceType == null)  && 
-            (resourceName != null ? resourceName.equals(that.resourceName) : that.resourceName == null)  && 
-            (resourceDesc != null ? resourceDesc.equals(that.resourceDesc) : that.resourceDesc == null)  && 
-            (resourcePath != null ? resourcePath.equals(that.resourcePath) : that.resourcePath == null)  && 
-            (priority != null ? priority.equals(that.priority) : that.priority == null)  && 
-            enable == that.enable  && 
-            issys == that.issys  && 
-            Objects.equals(moduleId, that.moduleId) ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof SysResourcesEntity)) return false;
+        SysResourcesEntity that = (SysResourcesEntity) object;
+        return Objects.equals(getSysResourcesId(), that.getSysResourcesId()) &&
+            Objects.equals(getResourceType(), that.getResourceType()) &&
+            Objects.equals(getResourceName(), that.getResourceName()) &&
+            Objects.equals(getResourceDesc(), that.getResourceDesc()) &&
+            Objects.equals(getResourcePath(), that.getResourcePath()) &&
+            Objects.equals(getPriority(), that.getPriority()) &&
+            Objects.equals(getEnable(), that.getEnable()) &&
+            Objects.equals(getIssys(), that.getIssys()) &&
+            Objects.equals(getModuleId(), that.getModuleId());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getSysResourcesId() != null ? getSysResourcesId().hashCode() : 0);
-        result = 31 * result + (resourceType != null ? resourceType.hashCode() : 0);
-        result = 31 * result + (resourceName != null ? resourceName.hashCode() : 0);
-        result = 31 * result + (resourceDesc != null ? resourceDesc.hashCode() : 0);
-        result = 31 * result + (resourcePath != null ? resourcePath.hashCode() : 0);
-        result = 31 * result + (priority != null ? priority.hashCode() : 0);
-        result = 31 * result + (enable ? 1 : 0);
-        result = 31 * result + (issys ? 1 : 0);
-        result = 31 * result + moduleId;
-        return result;
+        return Objects.hash(getSysResourcesId(), getResourceType(), getResourceName(), getResourceDesc(), getResourcePath(), getPriority(), getEnable(), getIssys(), getModuleId());
     }
 
     @Override
@@ -187,5 +179,73 @@ public class SysResourcesEntity implements Serializable {
         ",issys=" + issys +
         ",moduleId=" + moduleId +
         '}';
+    }
+
+    private SysResourcesEntity(Builder builder){
+        this.sysResourcesId = builder.sysResourcesId;
+        this.resourceType = builder.resourceType;
+        this.resourceName = builder.resourceName;
+        this.resourceDesc = builder.resourceDesc;
+        this.resourcePath = builder.resourcePath;
+        this.priority = builder.priority;
+        this.enable = builder.enable;
+        this.issys = builder.issys;
+        this.moduleId = builder.moduleId;
+    }
+
+    public static class Builder{
+        private Integer sysResourcesId;
+        private String resourceType;
+        private String resourceName;
+        private String resourceDesc;
+        private String resourcePath;
+        private String priority;
+        private Boolean enable;
+        private Boolean issys;
+        private int moduleId;
+
+        public Builder setSysResourcesId(int sysResourcesId) {
+            this.sysResourcesId = sysResourcesId;
+            return this;
+        }
+        public Builder setResourceType(String resourceType) {
+            this.resourceType = resourceType;
+            return this;
+        }
+        public Builder setResourceName(String resourceName) {
+            this.resourceName = resourceName;
+            return this;
+        }
+        public Builder setResourceDesc(String resourceDesc) {
+            this.resourceDesc = resourceDesc;
+            return this;
+        }
+        public Builder setResourcePath(String resourcePath) {
+            this.resourcePath = resourcePath;
+            return this;
+        }
+        public Builder setPriority(String priority) {
+            this.priority = priority;
+            return this;
+        }
+        public Builder setEnable(Boolean enable) {
+            this.enable = enable;
+            return this;
+        }
+        public Builder setIssys(Boolean issys) {
+            this.issys = issys;
+            return this;
+        }
+        public Builder setModuleId(int moduleId) {
+            this.moduleId = moduleId;
+            return this;
+        }
+        public SysResourcesEntity build(){
+            return new SysResourcesEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

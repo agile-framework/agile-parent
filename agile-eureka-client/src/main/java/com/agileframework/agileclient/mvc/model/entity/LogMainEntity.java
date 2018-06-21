@@ -1,30 +1,35 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "log_main",  catalog = "agile_db")
+@Remark("[系统管理]日志表")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class LogMainEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //唯一标识
+    @Remark("唯一标识")
     private Integer logMainId;
-    //业务编码
+    @Remark("业务编码")
     private String businessCode;
-    //业务对象类型
+    @Remark("业务对象类型")
     private String targetType;
-    //业务对象标识
+    @Remark("业务对象标识")
     private String targetCode;
-    //操作人
+    @Remark("操作人")
     private int userId;
-    //操作时间
+    @Remark("操作时间")
     private Date createTime;
 
     //无参构造器
@@ -42,7 +47,7 @@ public class LogMainEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "log_main_id" )
+    @Column(name = "log_main_id" , nullable = false )
     public Integer getLogMainId() {
         return logMainId;
     }
@@ -52,7 +57,7 @@ public class LogMainEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "business_code" )
+    @Column(name = "business_code" , nullable = false )
     public String getBusinessCode() {
         return businessCode;
     }
@@ -62,7 +67,7 @@ public class LogMainEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "target_type" )
+    @Column(name = "target_type" , nullable = false )
     public String getTargetType() {
         return targetType;
     }
@@ -72,7 +77,7 @@ public class LogMainEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "target_code" )
+    @Column(name = "target_code" , nullable = false )
     public String getTargetCode() {
         return targetCode;
     }
@@ -82,7 +87,7 @@ public class LogMainEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "user_id" )
+    @Column(name = "user_id" , nullable = false )
     public int getUserId() {
         return userId;
     }
@@ -92,7 +97,7 @@ public class LogMainEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "create_time" )
+    @Column(name = "create_time" , nullable = false )
     public Date getCreateTime() {
         return createTime;
     }
@@ -103,31 +108,21 @@ public class LogMainEntity implements Serializable {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        LogMainEntity that = (LogMainEntity) o;
-
-        return 
-            Objects.equals(logMainId, that.logMainId)  && 
-            (businessCode != null ? businessCode.equals(that.businessCode) : that.businessCode == null)  && 
-            (targetType != null ? targetType.equals(that.targetType) : that.targetType == null)  && 
-            (targetCode != null ? targetCode.equals(that.targetCode) : that.targetCode == null)  && 
-            Objects.equals(userId, that.userId)  && 
-            (getCreateTime() != null ? getCreateTime().equals(that.getCreateTime()) : that.getCreateTime() == null) ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof LogMainEntity)) return false;
+        LogMainEntity that = (LogMainEntity) object;
+        return Objects.equals(getLogMainId(), that.getLogMainId()) &&
+            Objects.equals(getBusinessCode(), that.getBusinessCode()) &&
+            Objects.equals(getTargetType(), that.getTargetType()) &&
+            Objects.equals(getTargetCode(), that.getTargetCode()) &&
+            Objects.equals(getUserId(), that.getUserId()) &&
+            Objects.equals(getCreateTime(), that.getCreateTime());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getLogMainId() != null ? getLogMainId().hashCode() : 0);
-        result = 31 * result + (businessCode != null ? businessCode.hashCode() : 0);
-        result = 31 * result + (targetType != null ? targetType.hashCode() : 0);
-        result = 31 * result + (targetCode != null ? targetCode.hashCode() : 0);
-        result = 31 * result + userId;
-        result = 31 * result + (getCreateTime() != null ? getCreateTime().hashCode() : 0);
-        return result;
+        return Objects.hash(getLogMainId(), getBusinessCode(), getTargetType(), getTargetCode(), getUserId(), getCreateTime());
     }
 
     @Override
@@ -140,5 +135,55 @@ public class LogMainEntity implements Serializable {
         ",userId=" + userId +
         ",createTime=" + createTime +
         '}';
+    }
+
+    private LogMainEntity(Builder builder){
+        this.logMainId = builder.logMainId;
+        this.businessCode = builder.businessCode;
+        this.targetType = builder.targetType;
+        this.targetCode = builder.targetCode;
+        this.userId = builder.userId;
+        this.createTime = builder.createTime;
+    }
+
+    public static class Builder{
+        private Integer logMainId;
+        private String businessCode;
+        private String targetType;
+        private String targetCode;
+        private int userId;
+        private Date createTime;
+
+        public Builder setLogMainId(int logMainId) {
+            this.logMainId = logMainId;
+            return this;
+        }
+        public Builder setBusinessCode(String businessCode) {
+            this.businessCode = businessCode;
+            return this;
+        }
+        public Builder setTargetType(String targetType) {
+            this.targetType = targetType;
+            return this;
+        }
+        public Builder setTargetCode(String targetCode) {
+            this.targetCode = targetCode;
+            return this;
+        }
+        public Builder setUserId(int userId) {
+            this.userId = userId;
+            return this;
+        }
+        public Builder setCreateTime(Date createTime) {
+            this.createTime = createTime;
+            return this;
+        }
+        public LogMainEntity build(){
+            return new LogMainEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

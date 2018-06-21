@@ -1,23 +1,28 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "sys_bt_authorities_resources",  catalog = "agile_db")
+@Remark("[系统管理]权限资源表")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class SysBtAuthoritiesResourcesEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //唯一标识
+    @Remark("唯一标识")
     private Integer sysBtAuthoritiesResourcesId;
-    //资源唯一标识
+    @Remark("资源唯一标识")
     private int resourceId;
-    //权限唯一标识
+    @Remark("权限唯一标识")
     private int authorityId;
 
     //无参构造器
@@ -32,7 +37,7 @@ public class SysBtAuthoritiesResourcesEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "sys_bt_authorities_resources_id" )
+    @Column(name = "sys_bt_authorities_resources_id" , nullable = false )
     public Integer getSysBtAuthoritiesResourcesId() {
         return sysBtAuthoritiesResourcesId;
     }
@@ -42,7 +47,7 @@ public class SysBtAuthoritiesResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "resource_id" )
+    @Column(name = "resource_id" , nullable = false )
     public int getResourceId() {
         return resourceId;
     }
@@ -52,7 +57,7 @@ public class SysBtAuthoritiesResourcesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "authority_id" )
+    @Column(name = "authority_id" , nullable = false )
     public int getAuthorityId() {
         return authorityId;
     }
@@ -63,25 +68,18 @@ public class SysBtAuthoritiesResourcesEntity implements Serializable {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SysBtAuthoritiesResourcesEntity that = (SysBtAuthoritiesResourcesEntity) o;
-
-        return 
-            Objects.equals(sysBtAuthoritiesResourcesId, that.sysBtAuthoritiesResourcesId)  && 
-            Objects.equals(resourceId, that.resourceId)  && 
-            Objects.equals(authorityId, that.authorityId) ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof SysBtAuthoritiesResourcesEntity)) return false;
+        SysBtAuthoritiesResourcesEntity that = (SysBtAuthoritiesResourcesEntity) object;
+        return Objects.equals(getSysBtAuthoritiesResourcesId(), that.getSysBtAuthoritiesResourcesId()) &&
+            Objects.equals(getResourceId(), that.getResourceId()) &&
+            Objects.equals(getAuthorityId(), that.getAuthorityId());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getSysBtAuthoritiesResourcesId() != null ? getSysBtAuthoritiesResourcesId().hashCode() : 0);
-        result = 31 * result + resourceId;
-        result = 31 * result + authorityId;
-        return result;
+        return Objects.hash(getSysBtAuthoritiesResourcesId(), getResourceId(), getAuthorityId());
     }
 
     @Override
@@ -91,5 +89,37 @@ public class SysBtAuthoritiesResourcesEntity implements Serializable {
         ",resourceId=" + resourceId +
         ",authorityId=" + authorityId +
         '}';
+    }
+
+    private SysBtAuthoritiesResourcesEntity(Builder builder){
+        this.sysBtAuthoritiesResourcesId = builder.sysBtAuthoritiesResourcesId;
+        this.resourceId = builder.resourceId;
+        this.authorityId = builder.authorityId;
+    }
+
+    public static class Builder{
+        private Integer sysBtAuthoritiesResourcesId;
+        private int resourceId;
+        private int authorityId;
+
+        public Builder setSysBtAuthoritiesResourcesId(int sysBtAuthoritiesResourcesId) {
+            this.sysBtAuthoritiesResourcesId = sysBtAuthoritiesResourcesId;
+            return this;
+        }
+        public Builder setResourceId(int resourceId) {
+            this.resourceId = resourceId;
+            return this;
+        }
+        public Builder setAuthorityId(int authorityId) {
+            this.authorityId = authorityId;
+            return this;
+        }
+        public SysBtAuthoritiesResourcesEntity build(){
+            return new SysBtAuthoritiesResourcesEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

@@ -1,36 +1,41 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "sys_roles",  catalog = "agile_db")
+@Remark("[系统管理]角色")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class SysRolesEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //角色唯一标识
+    @Remark("角色唯一标识")
     private Integer sysRolesId;
-    //角色名称
+    @Remark("角色名称")
     private String roleName;
-    //角色说明
+    @Remark("角色说明")
     private String roleDesc;
-    //是否可用
-    private boolean enable;
-    //是否系统权限
-    private boolean issys;
-    //模块
+    @Remark("是否可用")
+    private Boolean enable;
+    @Remark("是否系统权限")
+    private Boolean issys;
+    @Remark("模块")
     private String moduleId;
 
     //无参构造器
     public SysRolesEntity(){}
 
     //有参构造器
-    public SysRolesEntity(Integer sysRolesId,String roleName,String roleDesc,boolean enable,boolean issys,String moduleId){
+    public SysRolesEntity(Integer sysRolesId,String roleName,String roleDesc,Boolean enable,Boolean issys,String moduleId){
         this.sysRolesId = sysRolesId;
         this.roleName = roleName;
         this.roleDesc = roleDesc;
@@ -41,7 +46,7 @@ public class SysRolesEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "sys_roles_id" )
+    @Column(name = "sys_roles_id" , nullable = false )
     public Integer getSysRolesId() {
         return sysRolesId;
     }
@@ -51,7 +56,7 @@ public class SysRolesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "role_name" , nullable = false )
+    @Column(name = "role_name" )
     public String getRoleName() {
         return roleName;
     }
@@ -61,7 +66,7 @@ public class SysRolesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "role_desc" , nullable = false )
+    @Column(name = "role_desc" )
     public String getRoleDesc() {
         return roleDesc;
     }
@@ -71,27 +76,27 @@ public class SysRolesEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "enable" , nullable = false )
-    public boolean getEnable() {
+    @Column(name = "enable" )
+    public Boolean getEnable() {
         return enable;
     }
 
-    public void setEnable(boolean enable) {
+    public void setEnable(Boolean enable) {
         this.enable = enable;
     }
 
     @Basic
-    @Column(name = "issys" , nullable = false )
-    public boolean getIssys() {
+    @Column(name = "issys" )
+    public Boolean getIssys() {
         return issys;
     }
 
-    public void setIssys(boolean issys) {
+    public void setIssys(Boolean issys) {
         this.issys = issys;
     }
 
     @Basic
-    @Column(name = "module_id" , nullable = false )
+    @Column(name = "module_id" )
     public String getModuleId() {
         return moduleId;
     }
@@ -102,31 +107,21 @@ public class SysRolesEntity implements Serializable {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SysRolesEntity that = (SysRolesEntity) o;
-
-        return 
-            Objects.equals(sysRolesId, that.sysRolesId)  && 
-            (roleName != null ? roleName.equals(that.roleName) : that.roleName == null)  && 
-            (roleDesc != null ? roleDesc.equals(that.roleDesc) : that.roleDesc == null)  && 
-            enable == that.enable  && 
-            issys == that.issys  && 
-            (moduleId != null ? moduleId.equals(that.moduleId) : that.moduleId == null) ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof SysRolesEntity)) return false;
+        SysRolesEntity that = (SysRolesEntity) object;
+        return Objects.equals(getSysRolesId(), that.getSysRolesId()) &&
+            Objects.equals(getRoleName(), that.getRoleName()) &&
+            Objects.equals(getRoleDesc(), that.getRoleDesc()) &&
+            Objects.equals(getEnable(), that.getEnable()) &&
+            Objects.equals(getIssys(), that.getIssys()) &&
+            Objects.equals(getModuleId(), that.getModuleId());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getSysRolesId() != null ? getSysRolesId().hashCode() : 0);
-        result = 31 * result + (roleName != null ? roleName.hashCode() : 0);
-        result = 31 * result + (roleDesc != null ? roleDesc.hashCode() : 0);
-        result = 31 * result + (enable ? 1 : 0);
-        result = 31 * result + (issys ? 1 : 0);
-        result = 31 * result + (moduleId != null ? moduleId.hashCode() : 0);
-        return result;
+        return Objects.hash(getSysRolesId(), getRoleName(), getRoleDesc(), getEnable(), getIssys(), getModuleId());
     }
 
     @Override
@@ -139,5 +134,55 @@ public class SysRolesEntity implements Serializable {
         ",issys=" + issys +
         ",moduleId='" + moduleId + '\'' +
         '}';
+    }
+
+    private SysRolesEntity(Builder builder){
+        this.sysRolesId = builder.sysRolesId;
+        this.roleName = builder.roleName;
+        this.roleDesc = builder.roleDesc;
+        this.enable = builder.enable;
+        this.issys = builder.issys;
+        this.moduleId = builder.moduleId;
+    }
+
+    public static class Builder{
+        private Integer sysRolesId;
+        private String roleName;
+        private String roleDesc;
+        private Boolean enable;
+        private Boolean issys;
+        private String moduleId;
+
+        public Builder setSysRolesId(int sysRolesId) {
+            this.sysRolesId = sysRolesId;
+            return this;
+        }
+        public Builder setRoleName(String roleName) {
+            this.roleName = roleName;
+            return this;
+        }
+        public Builder setRoleDesc(String roleDesc) {
+            this.roleDesc = roleDesc;
+            return this;
+        }
+        public Builder setEnable(Boolean enable) {
+            this.enable = enable;
+            return this;
+        }
+        public Builder setIssys(Boolean issys) {
+            this.issys = issys;
+            return this;
+        }
+        public Builder setModuleId(String moduleId) {
+            this.moduleId = moduleId;
+            return this;
+        }
+        public SysRolesEntity build(){
+            return new SysRolesEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

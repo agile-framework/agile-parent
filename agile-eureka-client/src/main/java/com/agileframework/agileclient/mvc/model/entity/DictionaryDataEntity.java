@@ -1,34 +1,44 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "dictionary_data",  catalog = "agile_db")
-public class DictionaryDataEntity implements Serializable {
+@Remark("[系统管理]字典数据表")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+public class DictionaryDataEntity implements Serializable,Cloneable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //字典编码
+    @Remark("字典编码")
     private Integer code;
-    //字典表_字典编码
+    @Remark("字典表_字典编码")
     private String dicCode;
-    //字典值显示名称
+    @Remark("字典值显示名称")
     private String name;
-    //字典值代表值
+    @Remark("字典值代表值")
     private String value;
-    //字典值是否固定
-    private boolean isFixed;
+    @Remark("字典值是否固定")
+    private Boolean isFixed;
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     //无参构造器
     public DictionaryDataEntity(){}
 
     //有参构造器
-    public DictionaryDataEntity(Integer code,String dicCode,String name,String value,boolean isFixed){
+    public DictionaryDataEntity(Integer code,String dicCode,String name,String value,Boolean isFixed){
         this.code = code;
         this.dicCode = dicCode;
         this.name = name;
@@ -38,7 +48,7 @@ public class DictionaryDataEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "code" )
+    @Column(name = "code" , nullable = false )
     public Integer getCode() {
         return code;
     }
@@ -48,7 +58,7 @@ public class DictionaryDataEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "dic_code" , nullable = false )
+    @Column(name = "dic_code" )
     public String getDicCode() {
         return dicCode;
     }
@@ -58,7 +68,7 @@ public class DictionaryDataEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "name" )
+    @Column(name = "name" , nullable = false )
     public String getName() {
         return name;
     }
@@ -68,7 +78,7 @@ public class DictionaryDataEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "value" )
+    @Column(name = "value" , nullable = false )
     public String getValue() {
         return value;
     }
@@ -78,40 +88,31 @@ public class DictionaryDataEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "is_fixed" )
-    public boolean getIsFixed() {
+    @Column(name = "is_fixed" , nullable = false )
+    public Boolean getIsFixed() {
         return isFixed;
     }
 
-    public void setIsFixed(boolean isFixed) {
+    public void setIsFixed(Boolean isFixed) {
         this.isFixed = isFixed;
     }
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        DictionaryDataEntity that = (DictionaryDataEntity) o;
-
-        return 
-            Objects.equals(code, that.code)  && 
-            (dicCode != null ? dicCode.equals(that.dicCode) : that.dicCode == null)  && 
-            (name != null ? name.equals(that.name) : that.name == null)  && 
-            (value != null ? value.equals(that.value) : that.value == null)  && 
-            isFixed == that.isFixed ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof DictionaryDataEntity)) return false;
+        DictionaryDataEntity that = (DictionaryDataEntity) object;
+        return Objects.equals(getCode(), that.getCode()) &&
+            Objects.equals(getDicCode(), that.getDicCode()) &&
+            Objects.equals(getName(), that.getName()) &&
+            Objects.equals(getValue(), that.getValue()) &&
+            Objects.equals(getIsFixed(), that.getIsFixed());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getCode() != null ? getCode().hashCode() : 0);
-        result = 31 * result + (dicCode != null ? dicCode.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (value != null ? value.hashCode() : 0);
-        result = 31 * result + (isFixed ? 1 : 0);
-        return result;
+        return Objects.hash(getCode(), getDicCode(), getName(), getValue(), getIsFixed());
     }
 
     @Override
@@ -123,5 +124,49 @@ public class DictionaryDataEntity implements Serializable {
         ",value='" + value + '\'' +
         ",isFixed=" + isFixed +
         '}';
+    }
+
+    private DictionaryDataEntity(Builder builder){
+        this.code = builder.code;
+        this.dicCode = builder.dicCode;
+        this.name = builder.name;
+        this.value = builder.value;
+        this.isFixed = builder.isFixed;
+    }
+
+    public static class Builder{
+        private Integer code;
+        private String dicCode;
+        private String name;
+        private String value;
+        private Boolean isFixed;
+
+        public Builder setCode(int code) {
+            this.code = code;
+            return this;
+        }
+        public Builder setDicCode(String dicCode) {
+            this.dicCode = dicCode;
+            return this;
+        }
+        public Builder setName(String name) {
+            this.name = name;
+            return this;
+        }
+        public Builder setValue(String value) {
+            this.value = value;
+            return this;
+        }
+        public Builder setIsFixed(Boolean isFixed) {
+            this.isFixed = isFixed;
+            return this;
+        }
+        public DictionaryDataEntity build(){
+            return new DictionaryDataEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }

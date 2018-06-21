@@ -1,28 +1,33 @@
 package com.agileframework.agileclient.mvc.model.entity;
 
+import com.agileframework.agileclient.common.annotation.Remark;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
 
 /**
-* Created by 佟盟
-*/
+ * Created by 佟盟
+ */
 @Entity
 @Table(name = "sys_persistent_logins",  catalog = "agile_db")
+@Remark("[系统管理]登陆用户信息")
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class SysPersistentLoginsEntity implements Serializable {
 
     //序列
     private static final long serialVersionUID = 1L;
-    //唯一标识
+    @Remark("唯一标识")
     private Integer sysPersistentLoginsId;
-    //用户名
+    @Remark("用户名")
     private String username;
-    //序列
+    @Remark("序列")
     private String series;
-    //认证信息
+    @Remark("认证信息")
     private String token;
-    //最后时间
+    @Remark("最后时间")
     private Timestamp lastUsed;
 
     //无参构造器
@@ -39,7 +44,7 @@ public class SysPersistentLoginsEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column(name = "sys_persistent_logins_id" )
+    @Column(name = "sys_persistent_logins_id" , nullable = false )
     public Integer getSysPersistentLoginsId() {
         return sysPersistentLoginsId;
     }
@@ -49,7 +54,7 @@ public class SysPersistentLoginsEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "username" , nullable = false )
+    @Column(name = "username" )
     public String getUsername() {
         return username;
     }
@@ -59,7 +64,7 @@ public class SysPersistentLoginsEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "series" )
+    @Column(name = "series" , nullable = false )
     public String getSeries() {
         return series;
     }
@@ -69,7 +74,7 @@ public class SysPersistentLoginsEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "token" , nullable = false )
+    @Column(name = "token" )
     public String getToken() {
         return token;
     }
@@ -79,7 +84,7 @@ public class SysPersistentLoginsEntity implements Serializable {
     }
 
     @Basic
-    @Column(name = "last_used" )
+    @Column(name = "last_used" , nullable = false )
     public Timestamp getLastUsed() {
         return lastUsed;
     }
@@ -90,29 +95,20 @@ public class SysPersistentLoginsEntity implements Serializable {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        SysPersistentLoginsEntity that = (SysPersistentLoginsEntity) o;
-
-        return 
-            Objects.equals(sysPersistentLoginsId, that.sysPersistentLoginsId)  && 
-            (username != null ? username.equals(that.username) : that.username == null)  && 
-            (series != null ? series.equals(that.series) : that.series == null)  && 
-            (token != null ? token.equals(that.token) : that.token == null)  && 
-            (getLastUsed() != null ? getLastUsed().equals(that.getLastUsed()) : that.getLastUsed() == null) ;
+    public boolean equals(Object object) {
+        if (this == object) return true;
+        if (!(object instanceof SysPersistentLoginsEntity)) return false;
+        SysPersistentLoginsEntity that = (SysPersistentLoginsEntity) object;
+        return Objects.equals(getSysPersistentLoginsId(), that.getSysPersistentLoginsId()) &&
+            Objects.equals(getUsername(), that.getUsername()) &&
+            Objects.equals(getSeries(), that.getSeries()) &&
+            Objects.equals(getToken(), that.getToken()) &&
+            Objects.equals(getLastUsed(), that.getLastUsed());
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        result = 31 * result + (getSysPersistentLoginsId() != null ? getSysPersistentLoginsId().hashCode() : 0);
-        result = 31 * result + (username != null ? username.hashCode() : 0);
-        result = 31 * result + (series != null ? series.hashCode() : 0);
-        result = 31 * result + (token != null ? token.hashCode() : 0);
-        result = 31 * result + (getLastUsed() != null ? getLastUsed().hashCode() : 0);
-        return result;
+        return Objects.hash(getSysPersistentLoginsId(), getUsername(), getSeries(), getToken(), getLastUsed());
     }
 
     @Override
@@ -124,5 +120,49 @@ public class SysPersistentLoginsEntity implements Serializable {
         ",token='" + token + '\'' +
         ",lastUsed=" + lastUsed +
         '}';
+    }
+
+    private SysPersistentLoginsEntity(Builder builder){
+        this.sysPersistentLoginsId = builder.sysPersistentLoginsId;
+        this.username = builder.username;
+        this.series = builder.series;
+        this.token = builder.token;
+        this.lastUsed = builder.lastUsed;
+    }
+
+    public static class Builder{
+        private Integer sysPersistentLoginsId;
+        private String username;
+        private String series;
+        private String token;
+        private Timestamp lastUsed;
+
+        public Builder setSysPersistentLoginsId(int sysPersistentLoginsId) {
+            this.sysPersistentLoginsId = sysPersistentLoginsId;
+            return this;
+        }
+        public Builder setUsername(String username) {
+            this.username = username;
+            return this;
+        }
+        public Builder setSeries(String series) {
+            this.series = series;
+            return this;
+        }
+        public Builder setToken(String token) {
+            this.token = token;
+            return this;
+        }
+        public Builder setLastUsed(Timestamp lastUsed) {
+            this.lastUsed = lastUsed;
+            return this;
+        }
+        public SysPersistentLoginsEntity build(){
+            return new SysPersistentLoginsEntity(this);
+        }
+    }
+
+    public static Builder builder(){
+        return new Builder();
     }
 }
